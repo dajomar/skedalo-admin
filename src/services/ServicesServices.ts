@@ -1,5 +1,6 @@
 import api from "@/api/api/axios";
-import type { Services } from "i18next";
+import type { Services } from "@/types";
+
 
 
 
