@@ -14,9 +14,8 @@ const Home = () => {
         <>
             <div className="flex h-screen w-full overflow-hidden">
                 {/* Sidebar */}
-                <aside className="w-64 flex-shrink-0 bg-white text-gray-800 hidden lg:flex flex-col">
-                    <MenuBar />
-                </aside>
+                
+                <MenuBar />
 
                 {/* Contenedor principal */}
                 <main className="flex flex-col flex-1">

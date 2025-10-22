@@ -1,6 +1,10 @@
+import { capitalizeFirstLetter } from "@/helpers/helpers";
+import { useLocation } from "react-router-dom";
 
 
 export const Header = () => {
+
+    const location = useLocation(); // { pathname: "/dashboard", search: "", hash: "" }
 
 
     return (
@@ -10,7 +14,7 @@ export const Header = () => {
                     <button className="lg:hidden mr-4">
                         <span className="material-symbols-outlined">menu</span>
                     </button>
-                    <h2 className="text-2xl font-bold text-gray-800">Dashboard</h2>
+                    <h2 className="mr-10 text-2xl font-bold text-gray-800">{capitalizeFirstLetter(location.pathname.substring(1))}</h2>
                 </div>
                 <div className="flex items-center space-x-4">
                     <button className="text-gray-500 hover:text-gray-700">
