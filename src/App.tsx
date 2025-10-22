@@ -29,7 +29,7 @@ const Company = lazy(() => import("./pages/Company/Company"));
                 <Route path="/company" element={<Company />} />
               </Route>
             ) : (
-              <Route path="*" element={<Navigate to="/home" />} />
+              <Route path="*" element={<Navigate to="/login" />} />
             )}
           </Routes>
         </div>
