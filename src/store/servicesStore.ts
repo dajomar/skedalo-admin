@@ -1,6 +1,7 @@
-import type { Response, Services } from './../types/index';
+
 import { create } from "zustand";
 import { listServicesByCompany, saveService } from "../services/ServicesServices";
+import type { Services,Response } from "@/types";
 
 export type ServicesState = {
    services : Services[]
