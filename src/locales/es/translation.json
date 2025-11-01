@@ -102,6 +102,9 @@
   "max-capacity": "Capacidad Máxima",
   "email": "Email",
   "services-associated": "Servicios asociados al recurso",
+  "assignServices": "Asignar servicios",
+  "manageServices": "Gestionar servicios",
+  "noServices": "No hay servicios disponibles",
   "error-save-resource": "Error al guardar el recurso",  
 
   "menu-title": "Menú", 

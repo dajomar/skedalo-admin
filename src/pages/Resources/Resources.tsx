@@ -46,6 +46,9 @@ export const ResourcesPage = () => {
 
   // Lista temporal de servicios para el recurso
   const [servicesTemp, setServicesTemp] = useState<Services[]>([]);
+  // Modal para asignar servicios a un recurso
+  const [showServicesModal, setShowServicesModal] = useState(false);
+  const [resourceForServices, setResourceForServices] = useState<Resources | null>(null);
 
   useMemo(() => {
     if (resources.length === 0) listResourcesByCompany(companyId);
@@ -113,6 +116,73 @@ useEffect(() => {
     setPreviewPhotoUrl(res.photoUrl || "");
     await listByBranchAndResource(res.branchId, res.resourceId || 0);
     setShowModal(true);
+  };
+
+  // Abrir modal independiente para gestionar servicios del recurso
+  const handleOpenServicesModal = async (res: Resources) => {
+    setResourceForServices(res);
+    // Cargar servicios asignados para este recurso (actualiza resourcesServices en store)
+    await listByBranchAndResource(res.branchId, res.resourceId || 0);
+    // servicesTemp será sincronizado por el useEffect que observa resourcesServices
+    setShowServicesModal(true);
+  };
+
+  const handleCloseServicesModal = () => {
+    setShowServicesModal(false);
+    setResourceForServices(null);
+  };
+
+  const handleSaveServices = async () => {
+    if (!resourceForServices) return;
+
+    // Reconstruir DTO usando la misma lógica que en el submit principal
+    const serviciosDTO: ResourcesServices[] = [];
+    const resourceActual = { ...resourceForServices, updatedBy: userId, updatedAt: new Date() } as Resources;
+
+    // Servicios que venían asociados (resourcesServices)
+    resourcesServices.forEach((rs) => {
+      const tempSrv = servicesTemp.find((s) => s.serviceId === rs.service.serviceId);
+      if (tempSrv) {
+        serviciosDTO.push({
+          ...rs,
+          status: tempSrv.status === "A" ? "A" : "I",
+          resource: resourceActual,
+          service: tempSrv,
+        });
+      }
+    });
+
+    // Servicios nuevos asociados
+    servicesTemp.forEach((srv) => {
+      const yaAsociado = resourcesServices.find((rs) => rs.service.serviceId === srv.serviceId);
+      if (!yaAsociado && srv.status === "A") {
+        serviciosDTO.push({
+          resServId: null,
+          branchId: resourceActual.branchId,
+          status: "A",
+          resource: resourceActual,
+          service: srv,
+        });
+      }
+    });
+
+    const resourceDTO: ResourcesServicesDTO = {
+      resource: resourceActual,
+      services: serviciosDTO,
+    };
+
+    const resp = await saveResourceServices(resourceDTO);
+    if (resp && resp.messageId === "TR000") {
+      showAlertInfo(resp.messageText || t('resources.servicesUpdated'));
+      // refrescar
+      await listByBranchAndResource(resourceActual.branchId, resp.dataNumber1 || resourceActual.resourceId || 0);
+      await listResourcesByCompany(companyId);
+      handleCloseServicesModal();
+    } else if (resp) {
+      showAlertError(resp.messageText || t('common.errorOccurred'));
+    } else {
+      showAlertError(t('common.errorOccurred'));
+    }
   };
 
 
@@ -331,9 +401,14 @@ useEffect(() => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.maxCapacity}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.status}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button onClick={() => handleSelectResource(r)} className="text-primary hover:text-primary/70 mr-2">
-                        <span className="material-symbols-outlined text-base">edit</span>
-                      </button>
+                      <div className="flex items-center justify-end space-x-2">
+                        <button onClick={() => handleSelectResource(r)} className="text-primary hover:text-primary/70" title={t('common.edit')}>
+                          <span className="material-symbols-outlined text-base">edit</span>
+                        </button>
+                        <button onClick={() => handleOpenServicesModal(r)} className="text-primary hover:text-primary/70" title={t('resources.manageServices') || 'Manage services'}>
+                          <span className="material-symbols-outlined text-base">assignment</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -420,6 +495,36 @@ useEffect(() => {
                     {previewPhotoUrl && <img src={previewPhotoUrl} alt="preview" className="mt-2 w-24 h-24 object-cover rounded-md" />}
                   </div>
 
+                  {/* Services assignment list - allow toggling which services are assigned to the resource */}
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Services</label>
+                    <div className="mt-2 border rounded-md p-2 max-h-48 overflow-auto">
+                      {servicesTemp.length === 0 ? (
+                        <div className="text-sm text-gray-500">No services available</div>
+                      ) : (
+                        <ul className="space-y-2">
+                          {servicesTemp.map((srv) => (
+                            <li key={srv.serviceId} ref={itemRef} className="flex items-center justify-between">
+                              <label className="flex items-center space-x-3 cursor-pointer w-full">
+                                <input
+                                  type="checkbox"
+                                  checked={srv.status === 'A'}
+                                  onChange={() => toggleActive(srv.serviceId!)}
+                                  className="h-4 w-4 text-primary border-gray-300 rounded"
+                                />
+                                <div className="min-w-0">
+                                  <div className="text-sm font-medium text-gray-900 truncate">{srv.serviceName}</div>
+                                  <div className="text-xs text-gray-500 truncate">{srv.description}</div>
+                                </div>
+                                <div className="ml-2 text-xs text-gray-500">{srv.durationMinutes ? `${srv.durationMinutes} min` : ''}</div>
+                              </label>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Status</label>
                     <select name="status" value={formData.status} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
@@ -434,6 +539,54 @@ useEffect(() => {
                   <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Save</button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+        {/* Services modal independiente */}
+        {showServicesModal && resourceForServices && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40" onClick={handleCloseServicesModal} />
+            <div className="relative w-full max-w-2xl mx-4 bg-white rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">{t('resources.assignServices')} - {resourceForServices.resourceName}</h3>
+                <button onClick={handleCloseServicesModal} className="text-gray-500 hover:text-gray-700">
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="max-h-72 overflow-auto border rounded-md p-2">
+                {servicesTemp.length === 0 ? (
+                  <div className="text-sm text-gray-500">{t('resources.noServices') || 'No services available'}</div>
+                ) : (
+                  <ul className="space-y-2">
+                    {servicesTemp.map((srv) => (
+                      <li key={srv.serviceId} className="flex items-center justify-between">
+                        <label className="flex items-center space-x-3 cursor-pointer w-full">
+                          <input
+                            type="checkbox"
+                            checked={srv.status === 'A'}
+                            onChange={() => toggleActive(srv.serviceId!)}
+                            className="h-4 w-4 text-primary border-gray-300 rounded"
+                          />
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-gray-900 truncate">{srv.serviceName}</div>
+                            <div className="text-xs text-gray-500 truncate">{srv.description}</div>
+                          </div>
+                          <div className="ml-2 text-xs text-gray-500">{srv.durationMinutes ? `${srv.durationMinutes} min` : ''}</div>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="mt-4 flex justify-end space-x-3">
+                <button onClick={handleCloseServicesModal} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">{t('common.cancel')}</button>
+                <button onClick={handleSaveServices} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">{t('common.save')}</button>
+              </div>
             </div>
           </div>
         )}
