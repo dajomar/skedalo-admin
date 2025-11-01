@@ -19,9 +19,10 @@ interface MenuItem {
 const menu: MenuItem[] = [
     { id: 1, name: 'Dashboard', icon: 'dashboard', redirectTo: '/dashboard', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
     { id: 2, name: 'Appointments', icon: 'calendar_today', redirectTo: '/', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 3, name: 'Clients', icon: 'people', redirectTo: '/', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 4, name: 'Services', icon: 'design_services', redirectTo: '/', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 5, name: 'Settings', icon: 'settings', redirectTo: '/company', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
+    { id: 3, name: 'Branches', icon: 'people', redirectTo: '/branches', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
+    { id: 4, name: 'Services', icon: 'design_services', redirectTo: '/services', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
+    { id: 5, name: 'Resources', icon: 'settings', redirectTo: '/resources', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
+    { id: 6, name: 'Settings', icon: 'settings', redirectTo: '/company', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
 
 ]
 
