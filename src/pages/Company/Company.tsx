@@ -7,6 +7,7 @@ import type { Companies } from "@/types";
 import { showAlertError, showAlertInfo } from "@/utils/sweetalert2";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 
 const Company = () => {
@@ -166,6 +167,12 @@ const Company = () => {
         setFormData(prev => ({ ...prev, logoUrl: newLogoUrl }));
     };
 
+    const getCompanyCodeName = () => {
+        if (company) {
+            return company.companyName.replaceAll(" ", "-").toLowerCase(); 
+        }
+        return "";
+    }
 
     return (
         <>
@@ -186,6 +193,7 @@ const Company = () => {
                                         value={formData.companyCode}
                                         onChange={handleInputChange} />
                                 </div>
+
 
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-medium text-gray-700" htmlFor="business-name">
@@ -296,7 +304,7 @@ const Company = () => {
                                         value={formData.contactName}
                                         onChange={handleInputChange} />
                                 </div>
-                                <div className="md:col-span-2">
+                                 <div>
                                     <label className="block text-sm font-medium text-gray-700" htmlFor="phone">
                                         {t("contact-phone")}
                                     </label>
@@ -308,7 +316,7 @@ const Company = () => {
                                         onChange={handleInputChange}
                                     />
                                 </div>
-                                <div className="md:col-span-2">
+                                <div >
                                     <label className="block text-sm font-medium text-gray-700" htmlFor="email">
                                         Contact
                                         Email (pendiente)
@@ -328,6 +336,19 @@ const Company = () => {
                                         onChange={handleInputChange}
                                         placeholder={t("websiteUrl-placeholder")}
                                     />
+                                </div>
+
+                                <div className="md:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700" htmlFor="websiteUrl">{t("websiteUrl")}
+                                    </label>
+
+                                    <a href={`https://site.skedalo.com/${getCompanyCodeName()}`} className="text-primary hover:underline" target="_blank">
+                                        <p>{`https://site.skedalo.com/${getCompanyCodeName()}`}</p>
+                                        
+                                    </a>
+
+                                    
+                                    
                                 </div>
 
                                 <div>
