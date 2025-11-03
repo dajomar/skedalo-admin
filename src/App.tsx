@@ -13,6 +13,7 @@ const Company = lazy(() => import("./pages/Company/Company"));
 const ServicesCompany = lazy(() => import("./pages/ServicesCompany/Services"));
 const Branches = lazy(() => import("./pages/Branches/Branches"));
 const ResourcesPage = lazy(() => import("./pages/Resources/Resources"));
+const ServiceCategoriesPage = lazy(() => import("./pages/ServiceCategories/ServicesCategories"));
 
 
  const  App= () =>  {
@@ -33,6 +34,7 @@ const ResourcesPage = lazy(() => import("./pages/Resources/Resources"));
                 <Route path="/branches" element={<Branches />} />
                 <Route path="/resources" element={<ResourcesPage />} />
                 <Route path="/services" element={<ServicesCompany />} />
+                <Route path="/service-categories" element={<ServiceCategoriesPage />} />
               </Route>
             ) : (
               <Route path="*" element={<Navigate to="/login" />} />

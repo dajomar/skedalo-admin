@@ -5,32 +5,62 @@ import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom';
 
 
+interface SubMenuItem {
+    id: number;
+    name: string;
+    redirectTo: string;
+}
+
 interface MenuItem {
     id: number;
     name: string;
     icon: string;
-    redirectTo: string;
+    redirectTo?: string;
     cssClass: string;
     cssActiveClass: string;
     cssInactiveClass?: string;
-
+    subItems?: SubMenuItem[];
 }
 
-const menu: MenuItem[] = [
-    { id: 1, name: 'Dashboard', icon: 'dashboard', redirectTo: '/dashboard', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 2, name: 'Appointments', icon: 'calendar_today', redirectTo: '/', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 3, name: 'Branches', icon: 'store', redirectTo: '/branches', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 4, name: 'Services', icon: 'design_services', redirectTo: '/services', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 5, name: 'Resources', icon: 'group', redirectTo: '/resources', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
-    { id: 6, name: 'Settings', icon: 'settings', redirectTo: '/company', cssClass: 'flex items-center px-4 py-2 rounded-lg', cssActiveClass: 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold', cssInactiveClass: 'text-gray-600 hover:bg-gray-100' },
+const cssClassMenuItem = 'flex items-center px-4 py-2 rounded-lg';
+const cssActiveClassMenuItem = 'text-gray-700 bg-primary/10 rounded-lg text-primary font-semibold';
+const cssInactiveClassMenuItem = 'text-gray-600 hover:bg-gray-100'; 
 
+const menu: MenuItem[] = [
+    { id: 1, name: 'Dashboard', icon: 'dashboard', redirectTo: '/dashboard', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
+    { id: 2, name: 'Appointments', icon: 'calendar_today', redirectTo: '/', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
+    { id: 3, name: 'Branches', icon: 'store', redirectTo: '/branches', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
+    { 
+        id: 4, 
+        name: 'Services', 
+        icon: 'design_services', 
+        cssClass: cssClassMenuItem, 
+        cssActiveClass: cssActiveClassMenuItem, 
+        cssInactiveClass:cssInactiveClassMenuItem,
+        subItems: [
+            { id: 41, name: 'Service List', redirectTo: '/services' },
+            { id: 42, name: 'Categories', redirectTo: '/service-categories' },
+            { id: 43, name: 'Pricing', redirectTo: '/service-pricing' }
+        ]
+    },
+    { id: 5, name: 'Resources', icon: 'group', redirectTo: '/resources', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
+    { id: 6, name: 'Settings', icon: 'settings', redirectTo: '/company', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem }
 ]
 
 export default function MenuBar() {
-    const { t } = useTranslation()
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false); // controla el sidebar en móvil
+    const [expandedItems, setExpandedItems] = useState<number[]>([]);
 
     const toggleMenu = () => setIsOpen(!isOpen);
+    
+    const toggleSubMenu = (itemId: number) => {
+        setExpandedItems(prev => 
+            prev.includes(itemId) 
+                ? prev.filter(id => id !== itemId)
+                : [...prev, itemId]
+        );
+    };
 
 
     return (
@@ -60,20 +90,57 @@ export default function MenuBar() {
                 <nav className="flex-1 px-4 py-6 space-y-2">
 
                     {menu.map((menuItem) => (
-                        <NavLink key={menuItem.id}
-                            to={menuItem.redirectTo}
-                            className={({ isActive }) =>
-                                `${menuItem.cssClass} ${(isActive)
-                                    ? menuItem.cssActiveClass
-                                    : menuItem.cssInactiveClass
-                                }`
-                            }
-                        >
-                            <span className="material-symbols-outlined mr-3">{menuItem.icon} </span>
-                            {menuItem.name}
-
-                        </NavLink>
-
+                        <div key={menuItem.id}>
+                            {menuItem.subItems ? (
+                                <>
+                                    <button
+                                        onClick={() => toggleSubMenu(menuItem.id)}
+                                        className={`w-full ${menuItem.cssClass} ${menuItem.cssInactiveClass} text-left`}
+                                    >
+                                        <span className="material-symbols-outlined mr-3">{menuItem.icon}</span>
+                                        <span className="flex-1">{menuItem.name}</span>
+                                        <span className={`material-symbols-outlined transition-transform ${
+                                            expandedItems.includes(menuItem.id) ? 'rotate-180' : ''
+                                        }`}>
+                                            expand_more
+                                        </span>
+                                    </button>
+                                    {expandedItems.includes(menuItem.id) && (
+                                        <div className="ml-8 mt-2 space-y-2">
+                                            {menuItem.subItems.map((subItem) => (
+                                                <NavLink
+                                                    key={subItem.id}
+                                                    to={subItem.redirectTo}
+                                                    className={({ isActive }) =>
+                                                        `flex items-center px-4 py-2 rounded-lg ${
+                                                            isActive
+                                                                ? 'text-primary bg-primary/10 font-semibold'
+                                                                : 'text-gray-600 hover:bg-gray-100'
+                                                        }`
+                                                    }
+                                                >
+                                                    {subItem.name}
+                                                </NavLink>
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <NavLink
+                                    to={menuItem.redirectTo!}
+                                    className={({ isActive }) =>
+                                        `${menuItem.cssClass} ${
+                                            isActive
+                                                ? menuItem.cssActiveClass
+                                                : menuItem.cssInactiveClass
+                                        }`
+                                    }
+                                >
+                                    <span className="material-symbols-outlined mr-3">{menuItem.icon}</span>
+                                    {menuItem.name}
+                                </NavLink>
+                            )}
+                        </div>
                     ))}
 
                 </nav>
