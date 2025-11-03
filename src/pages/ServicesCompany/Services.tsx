@@ -56,7 +56,7 @@ const ServicesCompany = () => {
     const handleSelectService = (serv: Services) => {
         setFormData(serv);
         setShowModal(true);
-        console.log("Selected service:", serv);
+
     }
         
 
@@ -146,7 +146,7 @@ const ServicesCompany = () => {
                             onClick={() => { setFormData(initialService); setShowModal(true); }}
                             className="flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
                             <span className="material-symbols-outlined text-base mr-2">add</span>
-                            Add New Service
+                            {t('new-service', 'New Service')}
                         </button>
                     </div>
                 </div>

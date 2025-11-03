@@ -1,5 +1,6 @@
 import { capitalizeFirstLetter } from "@/helpers/helpers";
 import { useLocation } from "react-router-dom";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 
 export const Header = () => {
@@ -17,6 +18,7 @@ export const Header = () => {
                     <h2 className="mr-10 text-2xl font-bold text-gray-800">{capitalizeFirstLetter(location.pathname.substring(1))}</h2>
                 </div>
                 <div className="flex items-center space-x-4">
+                <LanguageSwitcher />
                     <button className="text-gray-500 hover:text-gray-700">
                         <span className="material-symbols-outlined">notifications</span>
                     </button>
