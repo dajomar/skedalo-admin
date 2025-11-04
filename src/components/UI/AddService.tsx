@@ -195,7 +195,7 @@ export default function AddService({ isOpen, onClose, initialService }: AddServi
               <label className="block text-sm font-medium text-gray-700">Icon (URL)</label>
               <input
                 name="icon"
-                value={form.icon}
+                value={form.icon || ''}
                 onChange={handleChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
                 placeholder="Icon URL"

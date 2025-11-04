@@ -192,6 +192,7 @@ const Branches = () => {
                 if (respuesta.messageId == "TR000") {
                     setFormData({ ...formData, branchId: respuesta.dataNumber1 });
                     showAlertInfo(respuesta.messageText);
+                    setShowSedesModal(false)
                     listarSedes(companyId);
                 }
                 else
@@ -276,7 +277,7 @@ const Branches = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch Name</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ciudad</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
                                 <th className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
                             </tr>
                         </thead>
@@ -359,6 +360,16 @@ const Branches = () => {
                                         <option value="">-- Select city --</option>
                                         {cities.map(c => <option key={c.cityId} value={c.cityId}>{c.cityName}</option>)}
                                     </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                                    <select name="status" value={formData.status || ''} onChange={handleSelectChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
+                                        <option value="">-- Select Status --</option>
+                                        <option value="A">Active</option>
+                                        <option value="I">Inactive</option>
+                                        
+                                    </select> 
                                 </div>
 
                                 <div>

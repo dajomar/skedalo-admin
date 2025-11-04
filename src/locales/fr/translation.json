@@ -54,6 +54,7 @@
   "inactive": "Inactif",
 
   "service-categories-title": "Catégories de services",
+  
   "view/select-category": "Voir/Sélectionner une catégorie",
   "description": "Description",
   "icon": "Icône",
@@ -81,6 +82,7 @@
   "service-categories-list-title": "Liste des catégories de services",
 
   "services-title": "Services",
+  "new-service": "Nouveau service",
   "view-select-service": "Voir/Sélectionner un service",
   "select-category-placeholder": "Sélectionner une catégorie",
   "duration-minutes": "Durée (minutes)",
@@ -93,6 +95,7 @@
   "resources-list-title": "Liste des ressources",
 
   "resources-title": "Ressources",
+  "new-resource": "Nouvelle ressource",
   "button-view-select-resource": "Voir/Sélectionner une ressource",
   "resource-type": "Type de ressource",
   "option-person": "Personne",

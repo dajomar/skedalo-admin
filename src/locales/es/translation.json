@@ -79,7 +79,7 @@
   "select": "Selecciona",  
 
   "service-categories-list-title": "Lista de Categorías de Servicios", 
-
+  "new-service": "Nuevo Servicio",
   "services-title": "Servicios",
   "view-select-service": "Ver/Seleccionar Servicios",
   "select-category-placeholder": "Selecciona una categoría",
@@ -93,6 +93,7 @@
   "resources-list-title": "Lista de Recursos",   
 
   "resources-title": "Recursos",
+  "new-resource": "Nuevo Recurso",
   "button-view-select-resource": "Ver/Seleccionar Recurso",
   "resource-type": "Tipo de Recurso",
   "option-person": "Persona",
