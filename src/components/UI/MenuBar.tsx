@@ -43,7 +43,13 @@ const menu: MenuItem[] = [
             { id: 43, name: 'Pricing', redirectTo: '/service-pricing' }
         ]
     },
-    { id: 5, name: 'Resources', icon: 'group', redirectTo: '/resources', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
+    { id: 5, name: 'Resources', icon: 'group', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem, 
+      subItems: [
+            { id: 51, name: 'Resource List', redirectTo: '/resources' },
+            { id: 52, name: 'Schedules', redirectTo: '/schedules' }
+        ]
+
+    },
     { id: 6, name: 'Settings', icon: 'settings', redirectTo: '/company', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem }
 ]
 

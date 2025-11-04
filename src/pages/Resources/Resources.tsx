@@ -363,10 +363,10 @@ export const ResourcesPage = () => {
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-200">
+                        {/* <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-200">
                             <span className="material-symbols-outlined text-base mr-2">filter_list</span>
                             Filters
-                        </button>
+                        </button> */}
                         <button onClick={handleAddNew} className="flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
                             <span className="material-symbols-outlined text-base mr-2">add</span>
                             {t('new-resource', 'New Resource')}
@@ -392,7 +392,11 @@ export const ResourcesPage = () => {
                                 <tr key={r.resourceId ?? Math.random()} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.resourceId}</td>
                                     <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-900 flex items-center">
-                                        <img src={r.photoUrl || '/placeholder.png'} alt="photo" className="w-10 h-10 rounded-full mr-3 object-cover" />
+                                        {r.photoUrl ? (
+                                            <img src={r.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-10 h-10 rounded-full mr-3 object-cover" />
+                                        ) : (
+                                            <span className="flex-shrink-0 text-4xl rounded-full bg-cover bg-center material-symbols-outlined dark:text-text-dark"> person </span>
+                                        )}
                                         <div>
                                             <div>{r.resourceName}</div>
                                             <div className="text-xs text-gray-500">{r.description}</div>
