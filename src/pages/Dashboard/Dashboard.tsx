@@ -1,16 +1,49 @@
 
+import Calendar from '@/components/UI/Calendar';
 import { useTranslation } from 'react-i18next'
 
 import { Link } from 'react-router-dom';
+import { UpcomingAppointments } from './components/UpcomingAppointments';
+import { useSedeStore } from '@/store/useSedeStore';
+import { useState, useEffect, use } from 'react';
+import { useAuthStore } from '@/store/authStore';
+import { set } from 'zod';
 
 
 export default function DashBoard() {
-    const { t } = useTranslation()
+    const { t } = useTranslation();
+    const { sedes, listarSedes } = useSedeStore();
+    const { companyId } = useAuthStore();
+    const [selectedBranch, setSelectedBranch] = useState<number | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [ calendarDay , setCalendarDay ] = useState<Date>(new Date());
 
+    // Load branches for company on mount
+    useEffect(() => {
+        if (companyId) listarSedes(companyId);
+    }, [companyId, listarSedes]);
+
+    // Set default selected branch when sedes load
+    useEffect(() => {
+        if (sedes.length > 0 && selectedBranch === null) {
+            setSelectedBranch(sedes[0].branchId ?? null);
+        }
+    }, [sedes, selectedBranch]);
+
+    useEffect(() => {
+        console.log("selectedDate in dashboard:", selectedDate);
+    }   , [selectedDate]);
+
+    const prueba = (date:any) => {
+
+        console.log("prueba", date);
+        setCalendarDay(date);
+
+    }
 
     return (
         <>
-            
+
             <div className="flex-1 p-6 overflow-y-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     <div className="bg-white p-5 rounded-lg shadow flex items-center justify-between">
@@ -50,8 +83,65 @@ export default function DashBoard() {
                         </div>
                     </div>
                 </div>
+
+                <div className="mb-4">
+                    <div className="flex items-center gap-3">
+                        <label
+                            htmlFor="branch_select"
+                            className="text-sm font-medium text-gray-700"
+                        >
+                            {t('branch', 'Branch')}:
+                        </label>
+
+                        <div className="relative">
+                            <select
+                                id="branch_select"
+                                value={selectedBranch != null ? String(selectedBranch) : ''}
+                                onChange={(e) =>
+                                    setSelectedBranch(e.target.value ? Number(e.target.value) : null)
+                                }
+                                className="appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm 
+                   focus:border-primary focus:ring-2 focus:ring-primary/30 transition duration-150 ease-in-out cursor-pointer"
+                            >
+                                <option value="">{t('select-branch', 'All branches')}</option>
+                                {sedes.map((s) => (
+                                    <option
+                                        key={s.branchId}
+                                        value={s.branchId != null ? String(s.branchId) : ''}
+                                    >
+                                        {s.branchName}
+                                    </option>
+                                ))}
+                            </select>
+
+                            {/* Icono de flecha */}
+                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                <svg
+                                    className="h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={2}
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+
+                    {/* calendar */}
+
+
+                    <Calendar date={calendarDay} onDateSelect={(dateSelected) => {setSelectedDate(dateSelected)}} />
+                    {/* <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-bold text-gray-800">Calendar</h3>
                             <div className="flex items-center space-x-2">
@@ -114,65 +204,15 @@ export default function DashBoard() {
                             <div className="text-gray-400 p-2 text-center">1</div>
                             <div className="text-gray-400 p-2 text-center">2</div>
                         </div>
-                    </div>
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">Upcoming Appointments</h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                                <img alt="Client avatar" className="h-12 w-12 rounded-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDklRPaWNVnJ1Vs75-C8yr7YOhBQAvtFL3LwPj01vRoJit4sfGrHhuKCAt40hxYH4o4ODLHf4dAUqL_H0yYHC135nDzCx1-d_fTpEpjAIVtDyMbqo4ZYv3irB2qM49qwE3LicHsiK1qOl7l9SPfHUMkA-JjFylmLo-fCXKskaPuApO4r32P21VoX9LB4UVtgex8V6ZAWgvYvBSHudcLm85Sxt7iOqSH2lisJ1pXwbLvcjea0XqxhxH29S1bVRT-FVoZqw8pUmJAq50" />
-                                <div className="flex-1">
-                                    <p className="font-semibold text-gray-800">Olivia Smith</p>
-                                    <p className="text-sm text-gray-500">Haircut &amp; Styling</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-semibold text-primary">10:30 AM</p>
-                                    <p className="text-xs text-gray-500">Today</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                                <img alt="Client avatar" className="h-12 w-12 rounded-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1RkAge293duXI9jxi3K4FDfNxqU5EK3-x72Oy2LYczpsh7qIwh_0SiHrwTrHBr6pGIA5pnOIwfrDk-DWYQzyKXavX3AAFU9CFEsqZFIp2hYvANlm5i0_1_T9mbDQy3eTVOpGcDSvcPNZsENYCZ4B65D3aXNRBnb9yWGkpJutgMxOU7hegPHD3uQJ0CWaJ8Og_1khO381PTJa0zy9gQilL1BIS9EpsR3B5qnkS-6snrk6FJQg4Usu3PYW4TghB-oRQvRwgkywVtuE" />
-                                <div className="flex-1">
-                                    <p className="font-semibold text-gray-800">Ethan Jones</p>
-                                    <p className="text-sm text-gray-500">Manicure</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-semibold text-gray-700">02:00 PM</p>
-                                    <p className="text-xs text-gray-500">Today</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                                <img alt="Client avatar" className="h-12 w-12 rounded-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhtQ3gCwSYD52fgWrpsLOcMpykKB05-lUA8VYXIGdMvguU5bZaHtDC8-hwS0JctzqCZ-sVRP34tTno-cm5rkJR1BPf3zgr6tAxpszSPef9cFxcTa2VRtPuKNNzhS3dol0noTYQm7ARBm7E1i9-J7nkvxA_WpFm7oq_mzyNuNqr1y08RYp6w60QFWE7MwRFN9WQtbwWdPm55zWTS-1f-23Y7V18aRlbXOs5G7vKbDNPnogqlPpI0E7IAkXs7NalKqkWU-n1cbiQOHE" />
-                                <div className="flex-1">
-                                    <p className="font-semibold text-gray-800">Sophia Williams</p>
-                                    <p className="text-sm text-gray-500">Facial Treatment</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-semibold text-gray-700">04:30 PM</p>
-                                    <p className="text-xs text-gray-500">Today</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
-                                <img alt="Client avatar" className="h-12 w-12 rounded-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWsczghtJDIeRvRNUWUUo48qbIaS4Ndr5K3DWyPcldGRuP4UchtEdOpNRXJVPLboLkyBxmKYG1eevLXDdkQODGcUgAqKTxUALeXRAOcL6dQHPEDwmzJeFkt5L9UPzQMGCdMatfvKAuQBbR9oLwbyRvUs52PC9aR4yU4ima887xmLCuY5whLsu_eF8bUC9wrn-GYSfrohkH8NNExTYVGaEotE5Ii9amoVV2gN0g3I7yNyijoTzqPbRAJCxyIJFNqWryLCQQe9vFGYU" />
-                                <div className="flex-1">
-                                    <p className="font-semibold text-gray-800">Liam Brown</p>
-                                    <p className="text-sm text-gray-500">Deep Tissue Massage</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-semibold text-gray-700">09:00 AM</p>
-                                    <p className="text-xs text-gray-500">Tomorrow</p>
-                                </div>
-                            </div>
-                        </div>
-                        <button className="mt-4 w-full text-primary font-semibold py-2 rounded-lg hover:bg-primary/5">View
-                            all appointments</button>
-                    </div>
+                    </div> */}
+
+
+
+                    <UpcomingAppointments date={selectedDate} branchId={selectedBranch ?? undefined} onDateSelected={(dateSelected)=>  prueba(dateSelected) } />
+
                 </div>
             </div>
-       
+
         </>
     )
 
