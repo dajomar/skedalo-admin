@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
-export default function Calendar ({ onDateSelect }: { onDateSelect?: (date: any) => void }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+export default function Calendar ({ date, onDateSelect }: { date?:Date; onDateSelect?: (date: any) => void }) {
+  const [currentDate, setCurrentDate] = useState( new Date());
   const today = new Date();
 
   const year = currentDate.getFullYear();
@@ -20,10 +20,31 @@ export default function Calendar ({ onDateSelect }: { onDateSelect?: (date: any)
   const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
+  useEffect(() => { 
+    
+    handleDateSelect(today.getDate());
+    },[]);
+
+    useEffect(() => {
+        if (!date) return;
+       handleDateSelect(date.getDate());
+        console.log("date changed in calendar:", date);
+        if (onDateSelect && selectedDate){
+          onDateSelect(new Date(selectedDate.year, selectedDate.month , selectedDate.day ));  
+    } 
+    }, [date]);
+
+useEffect(() => {
+    if (onDateSelect && selectedDate){
+      onDateSelect(new Date(selectedDate.year, selectedDate.month , selectedDate.day ));  
+}
+}, [selectedDate]);
+
+
   const handleDateSelect = (day: number) => {
-    const date = { day, month, year };
-    setSelectedDate(date);
-    if (onDateSelect) onDateSelect(date);
+    const dateSel = { day, month, year };
+    setSelectedDate(dateSel);
+    
   };
 
   const days = [];
