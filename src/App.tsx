@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import LoadingSpinner from "./components/UI/Spinner";
 import './App.css'
@@ -19,9 +19,29 @@ const  ScheduleResource = lazy(() => import("./pages/SchedulesPages/ScheduleReso
 const  UserProfile = lazy(() => import("./pages/UserProfile/UserProfile"));
 
 
- const  App= () =>  {
+const App = () => {
+  const { isAuthenticated, logout } = useAuthStore();
+  
+  // Verificar token expirado al cargar la app
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const exp = sessionStorage.getItem("tokenExp");
+      if (exp && Date.now() >= Number(exp)) {
+        logout();
+        return false;
+      }
+      return true;
+    };
 
-  const { isAuthenticated } = useAuthStore();
+    // Verificar inmediatamente
+    if (!checkTokenExpiration()) {
+      window.location.href = '/login';
+    }
+
+    // Verificar cada minuto
+    const interval = setInterval(checkTokenExpiration, 60000);
+    return () => clearInterval(interval);
+  }, [logout]);
 
   return (
     <Router>
