@@ -21,8 +21,7 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
   const gridTemplate = "grid-cols-[60px_repeat(auto-fill,minmax(150px,1fr))]";
 
   return (
-    <div className="relative overflow-auto border rounded-lg">
-      <div className={`min-w-full ${gridTemplate} grid`} style={{ minHeight: Math.min(timelineHeight, 700) }}>
+    <div className={`min-w-full ${gridTemplate} grid`} style={{ minHeight: Math.min(timelineHeight, 700) }}>
         {/* Hour column */}
         <div className="border-r bg-white sticky left-0 z-10" style={{ height: timelineHeight }}>
           <div className="relative h-full">
@@ -54,37 +53,47 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
                   const endMin = toMinutes(appointment.endTime) - START_HOUR * 60;
                   const top = startMin * PIXELS_PER_MINUTE;
                   const height = (endMin - startMin) * PIXELS_PER_MINUTE;
+                  const compactThreshold = 36; // px
+                  const isCompact = height < compactThreshold;
 
                   return (
                     <div
-                      key={appointment.appointmentId}
-                      onClick={() => onAppointmentAction(appointment)}
-                      className={
-                        `absolute left-1 right-1 text-white text-xs p-2 rounded-md shadow-sm transition-all duration-200
-                         ${appointment.status === "P" ? "cursor-pointer hover:shadow-lg hover:scale-[1.02] hover:z-10" : appointment.status === "C" ? "opacity-80" : "opacity-60"}`
-                      }
-                      style={{ top, height, backgroundColor: getRandomColor() }}
+                        key={appointment.appointmentId}
+                        onClick={() => onAppointmentAction(appointment)}
+                        className={
+                          `absolute left-1 right-1 text-white text-xs p-2 rounded-md shadow-sm transition-all duration-200 overflow-hidden
+                           ${appointment.status === "P" ? "cursor-pointer hover:shadow-lg hover:scale-[1.02] hover:z-10" : appointment.status === "C" ? "opacity-80" : "opacity-60"}`
+                        }
+                        style={{ top, height: Math.max(height, 28), minHeight: 28, backgroundColor: getRandomColor() }}
                       title={`${t("client")}: ${appointment.client}\n${t("service")}: ${appointment.serviceName}\n${t("status")}: ${
                         appointment.status === "P" ? t("pending") : appointment.status === "C" ? t("confirmed") : t("canceled")
                       }`}
                     >
-                      <div className="font-bold truncate mb-0.5">{appointment.client}</div>
-                      <div className="truncate text-[10px] opacity-90">{appointment.serviceName}</div>
-                      <div className="text-[10px] flex justify-between items-center mt-1">
-                        <span>{appointment.startTime} - {appointment.endTime}</span>
-                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium ${appointment.status === "P" ? "bg-yellow-500/20" : appointment.status === "C" ? "bg-green-500/20" : "bg-red-500/20"}`}>
-                          {appointment.status === "P" && "⏳"}
-                          {appointment.status === "C" && "✓"}
-                          {appointment.status === "X" && "✕"}
-                        </span>
-                      </div>
+                      {isCompact ? (
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="font-medium">{appointment.startTime}</span>
+                          <span className={`px-1 py-0.5 rounded text-[10px]`}>{appointment.status === "P" ? "⏳" : appointment.status === "C" ? "✓" : "✕"}</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="font-bold truncate mb-0.5">{appointment.client}</div>
+                          <div className="truncate text-[10px] opacity-90">{appointment.serviceName}</div>
+                          <div className="text-[10px] flex justify-between items-center mt-1">
+                            <span>{appointment.startTime} - {appointment.endTime}</span>
+                            <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium ${appointment.status === "P" ? "bg-yellow-500/20" : appointment.status === "C" ? "bg-green-500/20" : "bg-red-500/20"}`}>
+                              {appointment.status === "P" && "⏳"}
+                              {appointment.status === "C" && "✓"}
+                              {appointment.status === "X" && "✕"}
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   );
                 })}
             </div>
           </div>
         ))}
-      </div>
     </div>
   );
 }

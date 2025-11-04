@@ -154,14 +154,21 @@ export function Appointments() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
         </div>
       ) : (
-        <>
-          <ResourceHeader resources={resources} />
-          <CalendarView
-            appointments={appointments}
-            resources={resources}
-            onAppointmentAction={handleAppointmentAction}
-          />
-        </>
+        <div className="relative overflow-auto max-h-[700px] border rounded-lg">
+          {/* Resource header sticky at top of the scroll container */}
+          <div className="sticky top-0 z-20 bg-white">
+            <ResourceHeader resources={resources} />
+          </div>
+
+          {/* Calendar grid (will align with header because both use same grid template) */}
+          <div>
+            <CalendarView
+              appointments={appointments}
+              resources={resources}
+              onAppointmentAction={handleAppointmentAction}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
