@@ -1,12 +1,14 @@
 import { capitalizeFirstLetter } from "@/helpers/helpers";
-import { redirect, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useEffect, useRef, useState } from "react";
+import { useAuthStore } from "@/store/authStore";
 
 
 export const Header = () => {
 
     const location = useLocation();
+    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -14,7 +16,7 @@ export const Header = () => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setOpen(false);
+                //setOpen(false);
             }
         };
 
@@ -22,12 +24,23 @@ export const Header = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const userMenuOptions = [
-        { id: 1, label: 'Mi Perfil', icon: 'account_circle', action: () => console.log('profile') },
-        { id: 2, label: 'Configuración', icon: 'settings', action: () => console.log('settings') },
-        { id: 3, label: 'Cambiar Empresa', icon: 'business', action: () => console.log('change company') },
-        { id: 4, label: 'Cerrar Sesión', icon: 'logout', action: () => console.log('logout'), className: 'text-red-600 hover:bg-red-50' }
+    const navigateTo = (path: string) => {
+        console.log("navigating to:", path);
+        navigate(path);
+    }
+
+    const logout = useAuthStore(state => state.logout);
+
+    type MenuOption = { id: number; label: string; icon: string; action: string | (() => void); className?: string };
+
+    const userMenuOptions: MenuOption[] = [
+        { id: 1, label: 'Mi Perfil', icon: 'account_circle', action: '/profile' },
+        { id: 2, label: 'Configuración', icon: 'settings', action: '/company' },
+        { id: 3, label: 'Cambiar Empresa', icon: 'business', action: '/company' },
+        { id: 4, label: 'Cerrar Sesión', icon: 'logout', action: 'logout', className: 'text-red-600 hover:bg-red-50' }
     ];
+
+    
 
 
     return (
@@ -78,7 +91,24 @@ export const Header = () => {
                                 {userMenuOptions.map((option) => (
                                     <li key={option.id}>
                                         <button
-                                            onClick={option.action}
+                                            onClick={() => {
+                                                // close menu first
+                                                setOpen(false);
+                                                
+                                                // If action is a string path, navigate
+                                                if (typeof option.action === 'string') {
+                                                    if (option.action === 'logout') {
+                                                        // perform logout then navigate to login
+                                                        logout();
+                                                        navigate('/login');
+                                                    } else {
+                                                        navigate(option.action as string);
+                                                        //console.log("Navigated to:", option.action)
+                                                    }
+                                                } else if (typeof option.action === 'function') {
+                                                    option.action();
+                                                }
+                                            }}
                                             className={`flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 
                                             ${option.className || ''}`}
                                         >

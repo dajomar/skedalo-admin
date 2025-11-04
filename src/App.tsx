@@ -16,6 +16,7 @@ const Branches = lazy(() => import("./pages/Branches/Branches"));
 const ResourcesPage = lazy(() => import("./pages/Resources/Resources"));
 const ServiceCategoriesPage = lazy(() => import("./pages/ServiceCategories/ServicesCategories"));
 const  ScheduleResource = lazy(() => import("./pages/SchedulesPages/ScheduleResource"));
+const  UserProfile = lazy(() => import("./pages/UserProfile/UserProfile"));
 
 
  const  App= () =>  {
@@ -39,6 +40,7 @@ const  ScheduleResource = lazy(() => import("./pages/SchedulesPages/ScheduleReso
                 <Route path="/services" element={<ServicesCompany />} />
                 <Route path="/service-categories" element={<ServiceCategoriesPage />} />
                 <Route path="/schedules" element={<ScheduleResource />} />
+                <Route path="/profile" element={<UserProfile />} />
               </Route>
             ) : (
               <Route path="*" element={<Navigate to="/login" />} />
