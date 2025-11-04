@@ -40,7 +40,6 @@ const menu: MenuItem[] = [
         subItems: [
             { id: 41, name: 'Service List', redirectTo: '/services' },
             { id: 42, name: 'Categories', redirectTo: '/service-categories' },
-            { id: 43, name: 'Pricing', redirectTo: '/service-pricing' }
         ]
     },
     { id: 5, name: 'Resources', icon: 'group', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem, 
