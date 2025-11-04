@@ -1,4 +1,5 @@
 
+import Calendar from '@/components/UI/Calendar';
 import { useTranslation } from 'react-i18next'
 
 import { Link } from 'react-router-dom';
@@ -51,7 +52,11 @@ export default function DashBoard() {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+                    
+                    {/* calendar */}
+
+                    <Calendar />
+                    {/* <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-xl font-bold text-gray-800">Calendar</h3>
                             <div className="flex items-center space-x-2">
@@ -114,7 +119,11 @@ export default function DashBoard() {
                             <div className="text-gray-400 p-2 text-center">1</div>
                             <div className="text-gray-400 p-2 text-center">2</div>
                         </div>
-                    </div>
+                    </div> */}
+
+
+
+
                     <div className="bg-white p-6 rounded-lg shadow">
                         <h3 className="text-xl font-bold text-gray-800 mb-4">Upcoming Appointments</h3>
                         <div className="space-y-4">
