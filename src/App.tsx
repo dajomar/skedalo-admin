@@ -31,6 +31,7 @@ const  ScheduleResource = lazy(() => import("./pages/SchedulesPages/ScheduleReso
             <Route path="/login" element={<Login />} />
             {isAuthenticated ? (
               <Route element={<Home />}>
+                <Route path="/" element={<DashBoard />} />
                 <Route path="/dashboard" element={<DashBoard />} />
                 <Route path="/company" element={<Company />} />
                 <Route path="/branches" element={<Branches />} />
