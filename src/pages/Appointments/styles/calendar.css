@@ -1,0 +1,37 @@
+/* Add these styles to your global CSS or create a new CSS module */
+
+.rdp {
+  --rdp-cell-size: 36px;
+  --rdp-accent-color: #0ea5e9;
+  --rdp-background-color: #f3f4f6;
+  --rdp-accent-color-dark: #0284c7;
+  --rdp-background-color-dark: #e5e7eb;
+  --rdp-outline: 2px solid var(--rdp-accent-color);
+  --rdp-outline-selected: 2px solid var(--rdp-accent-color);
+  margin: 0;
+}
+
+.rdp-day_selected:not([disabled]), 
+.rdp-day_selected:focus:not([disabled]), 
+.rdp-day_selected:active:not([disabled]), 
+.rdp-day_selected:hover:not([disabled]) {
+  background-color: var(--rdp-accent-color);
+  color: white;
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: var(--rdp-background-color);
+}
+
+.rdp-day_today {
+  font-weight: bold;
+  color: var(--rdp-accent-color) !important;
+}
+
+/* Estilos para el select personalizado */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+}
