@@ -5,6 +5,7 @@ import { es, fr, enUS } from 'date-fns/locale';
 import { format } from 'date-fns';
 import type { HeaderControlsProps } from '../types';
 import i18next from 'i18next';
+import { BranchSelector } from '@/components/UI/BranchSelector';
 
 export function HeaderControls({
     currentDate,
@@ -28,6 +29,12 @@ export function HeaderControls({
         }
     };
 
+    const branchSelected = (branch:number | '') => {
+        if(branch === '') return; 
+        onBranchChange(branch);
+        console.log(branch)
+    }
+
     return (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-5 bg-white p-4 rounded-lg shadow-sm">
             {/* Calendar and navigation controls */}
@@ -43,7 +50,7 @@ export function HeaderControls({
                         </svg> */}
 
                         <span className="material-symbols-outlined w-5 h-5 "> chevron_left</span>
-                        
+
                     </button>
 
                     <div className="relative group">
@@ -100,36 +107,9 @@ export function HeaderControls({
             </div>
 
             {/* Branch selector */}
-            <div className="relative min-w-[200px]">
-                <label htmlFor="branch-select" className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('branch')}
-                </label>
-                <div className="relative">
-                    <select
-                        id="branch-select"
-                        value={selectedBranch ?? ''}
-                        onChange={(e) => onBranchChange(Number(e.target.value))}
-                        className="
-              block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none 
-              focus:ring-blue-500 focus:border-blue-500 rounded-lg transition-shadow
-              bg-white hover:bg-gray-50 cursor-pointer appearance-none
-            "
-                    >
-                        {branches.map((branch) => (
-                            <option key={branch.branchId} value={branch.branchId || ''}>
-                                {branch.branchName}
-                            </option>
-                        ))}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                        {/* <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                         */}
-                        
-                    </div>
-                </div>
-            </div>
+
+            <BranchSelector branches={branches} onBranchSelected={(branch) => {branchSelected(branch)}} />
+
         </div>
     );
 }
