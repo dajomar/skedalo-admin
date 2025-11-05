@@ -17,11 +17,13 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
   const timelineHeight = totalMinutes * PIXELS_PER_MINUTE; // px
   const { t } = useTranslation();
 
-  // Use the same grid template as ResourceHeader so columns align exactly
-  const gridTemplate = "grid-cols-[60px_repeat(auto-fill,minmax(150px,1fr))]";
+  // Calcula el ancho dinámico igual que ResourceHeader
+  const minWidth = 150;
+  const total = resources.length;
+  const gridTemplateColumns = `60px repeat(${total}, minmax(${minWidth}px, 1fr))`;
 
   return (
-    <div className={`min-w-full ${gridTemplate} grid`} style={{ minHeight: Math.min(timelineHeight, 700) }}>
+    <div className="min-w-full grid" style={{ gridTemplateColumns, minHeight: Math.min(timelineHeight, 700) }}>
         {/* Hour column */}
         <div className="border-r bg-white sticky left-0 z-10" style={{ height: timelineHeight }}>
           <div className="relative h-full">
