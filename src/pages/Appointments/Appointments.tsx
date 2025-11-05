@@ -16,6 +16,7 @@ import "react-day-picker/dist/style.css";
 import { HeaderControls } from "./components/HeaderControls";
 import { ResourceHeader } from "./components/ResourceHeader";
 import { CalendarView } from "./components/CalendarView";
+import { formatDate } from "@/helpers/helpers";
 
 export function Appointments() {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -41,11 +42,15 @@ export function Appointments() {
   }, [sedes]);
 
   const fetchAppointments = useCallback(async () => {
+    
+    
     if (!selectedBranch) return;
     
     setIsLoading(true);
+    
     try {
-      const date = currentDate.toISOString().split('T')[0];
+      const date = formatDate({day:currentDate.getDate(), month:currentDate.getMonth(), year:currentDate.getFullYear() })  //.toLocaleDateString().split('T')[0];
+      
       const appointmentProjection = await listByDateAndBranch(date, selectedBranch);
       setAppointments(appointmentProjection);
 
@@ -62,6 +67,7 @@ export function Appointments() {
           ])
         ).values()
       );
+      
       setResources(uniqueResources as Resource[]);
     } catch (error) {
       showAlertError(t("error-loading-appointments"));
