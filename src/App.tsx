@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate  } from "react-router-dom";
 import LoadingSpinner from "./components/UI/Spinner";
 import './App.css'
@@ -19,7 +19,28 @@ const  DayViewCalendar = lazy(() => import("./pages/Appointments/Appointments"))
 
 
 const App = () => {
-  const { isAuthenticated, } = useAuthStore();
+    const { isAuthenticated, logout } = useAuthStore();
+  
+  // Verificar token expirado al cargar la app
+  useEffect(() => {
+    const checkTokenExpiration = () => {
+      const exp = sessionStorage.getItem("tokenExp");
+      if (exp && Date.now() >= Number(exp)) {
+        logout();
+        return false;
+      }
+      return true;
+    };
+
+    // Verificar inmediatamente
+    if (!checkTokenExpiration()) {
+      window.location.href = '/login';
+    }
+
+    // Verificar cada minuto
+    const interval = setInterval(checkTokenExpiration, 60000);
+    return () => clearInterval(interval);
+  }, [logout]);
   
 
   return (
