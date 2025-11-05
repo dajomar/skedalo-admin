@@ -86,7 +86,7 @@ export function Appointments() {
 
   const gotToAppointmentsDetails = (appointment: AppointmentProjection) => {
 
-    navigate(`/details/branch/${appointment.branchId}/appointment/${appointment.appointmentId}`, {replace:true} );
+    navigate(`/details/branch/${appointment.branchId}/appointment/${appointment.appointmentId}` );
 
   }
 

@@ -1,4 +1,4 @@
-import { type AppointmentProjection } from '@/types';
+import { type AppointmentProjection, type Branches } from '@/types';
 
 export interface Resource {
   resourceId: number;
@@ -15,7 +15,7 @@ export interface CalendarViewProps {
 export interface HeaderControlsProps {
   currentDate: Date;
   selectedBranch: number | null;
-  branches: Array<{ branchId: number | null; branchName: string }>;
+  branches: Branches[];
   onDateChange: (date: Date) => void;
   onPrevDay: () => void;
   onNextDay: () => void;
