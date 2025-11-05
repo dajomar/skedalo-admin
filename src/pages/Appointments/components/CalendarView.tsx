@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
 import type { CalendarViewProps } from "../types";
 import { CALENDAR_CONFIG } from "../types";
 import { formatAvailableTime } from "@/helpers/helpers";
@@ -18,6 +19,23 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
   const timelineHeight = totalMinutes * PIXELS_PER_MINUTE; // px
   const { t } = useTranslation();
 
+  const [currentTimePosition, setCurrentTimePosition] = useState<number>(0);
+
+  useEffect(() => {
+    const updateCurrentTime = () => {
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const totalCurrentMinutes = (currentHour * 60 + currentMinutes) - (START_HOUR * 60);
+      setCurrentTimePosition(totalCurrentMinutes * PIXELS_PER_MINUTE);
+    };
+
+    updateCurrentTime();
+    const interval = setInterval(updateCurrentTime, 60000); // Actualizar cada minuto
+
+    return () => clearInterval(interval);
+  }, [START_HOUR, PIXELS_PER_MINUTE]);
+
   // Calcula el ancho dinámico igual que ResourceHeader
   const minWidth = 150;
   const total = resources.length;
@@ -35,6 +53,7 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
                 style={{ height: 60 * PIXELS_PER_MINUTE }}
               >
                 {String(START_HOUR + i).padStart(2, "0")}:00
+                {/* <div className="absolute top-[30px] w-full text-[10px] text-gray-400 flex justify-center">30</div> */}
               </div>
             ))}
           </div>
@@ -49,6 +68,28 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
           >
             {/* timeline area for this resource */}
             <div className="relative h-full">
+              {/* Grid lines for hours and half hours */}
+              <div className="absolute inset-0">
+                {Array.from({ length: totalHours * 2 }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`absolute w-full ${i % 2 === 0 ? 'border-t border-gray-200' : 'border-t border-gray-100'}`}
+                    style={{ top: (i * 30) * PIXELS_PER_MINUTE }}
+                  />
+                ))}
+              </div>
+              
+              {/* Current time line */}
+              {currentTimePosition > 0 && currentTimePosition < timelineHeight && (
+                <div 
+                  className="absolute w-full z-20 flex items-center"
+                  style={{ top: currentTimePosition }}
+                >
+                  <div className="w-2 h-2 rounded-full bg-red-500 -ml-1" />
+                  <div className="flex-1 border-t border-red-500" />
+                </div>
+              )}
+
               {appointments
                 .filter((appointment) => appointment.resourceId === resource.resourceId)
                 .map((appointment) => {
