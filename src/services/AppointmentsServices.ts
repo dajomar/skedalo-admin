@@ -14,6 +14,18 @@ export async function listByDateAndBranch(appointmentDate : string, branchId : n
 
 }
 
+export async function listAppointmentById(appointmentId : number) {
+    
+    const url = `/appointments/find/${appointmentId}`
+
+    const {data} = await api.get(url);    
+
+    if (data){        
+       return data
+    }
+
+}
+
 export async function cancelAppointment(appointmentId : number) {
     
     const url = `/appointments/cancelAppointment/${appointmentId}`

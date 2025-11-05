@@ -1,5 +1,5 @@
 import api from "@/api/api/axios";
-import type { Companies, CompaniesEmailSettings } from "@/types";
+import type { Branch, Companies, CompaniesEmailSettings } from "@/types";
 
 
 export async function saveCompany(company : Companies) {
@@ -51,6 +51,20 @@ export async function findCompanyEmailSettings(companyId : number) {
     }
 
 }
+
+ export const getBranchByCompanyAndBranchId = async ( branchId:number ):Promise<Branch | null >  => {
+    const url: string = `branches/find/${branchId}`;
+  
+    const {data} = await api.get(url);
+
+  
+    if (data){        
+       return data 
+    }
+    return null; 
+
+
+  }
 
 export async function uploadImage (file: File,
                                   companyId: number,

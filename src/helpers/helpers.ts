@@ -1,4 +1,4 @@
-import i18n from "i18next";
+import i18n, { t } from "i18next";
 
 /**
  * 
@@ -64,6 +64,21 @@ export const getISOString = ():string => (new Date().toISOString())
  * @returns Fortmatted hour xx:xx 
  */
 export const formatAvailableTime = (hour:string = '2999-12-31'):string => hour.substring(0,5);  
+
+
+/**
+ * Return formatted duration string
+ * @param minutes 
+ * @returns time in format string
+ */
+export const formatDuration = (minutes: number):string => {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        if (hours === 0) return `${mins} ${t('minutes').toLowerCase()}`;
+        if (mins === 0) return `${hours} ${hours === 1 ? t('hour') : t('hours')}`;
+        return `${hours} ${hours === 1 ? t('hour') : t('hours')} ${mins} ${t('minutes').toLowerCase()}`;
+    };
+
 
 export const isValidEmail = (email:string):boolean => /\S+@\S+\.\S+/.test(email);
 
@@ -168,3 +183,67 @@ export function omitFieldsFromObject<T extends object, K extends keyof T>(
     return clone;
   }
 
+  /**
+   * This function extract values of key given from array of objects
+   * 
+   * @param items array to explore
+   * @param key key for get values
+   * @returns array with values of key given
+   */
+export const getKeysFromArray = <T, K extends keyof T>(items: T[] | null | undefined, key: K): T[K][] => {
+  if (!items || items.length === 0) return [];
+  return items.map(item => item[key]);
+};
+
+/**
+ * 
+ * This function extract some keys from array of objects
+ * 
+ * @param array Array to explore
+ * @param keys keys to include in a new array
+ * @returns new array with news keys 
+ */
+
+export const getSomeKeysFromArray = <T, K extends keyof T>(
+  array: T[],
+  keys: K[]
+): Pick<T, K>[] => {
+  if (!Array.isArray(array) || array.length === 0) return [];
+  return array.map(item => {
+    const filtered = {} as Pick<T, K>;
+    keys.forEach(key => {
+      filtered[key] = item[key];
+    });
+    return filtered;
+  });
+};
+
+/**
+ * This function sum key property values from array of objects
+ * 
+ * @param items array to explore
+ * @param key Key for sum values
+ * @returns number with sum of property values
+ */
+export const sumPropertyFromArray = <T>(items: T[] | null | undefined, key: keyof T): number => {
+  if (!items || items.length === 0) return 0;
+  
+  return items.reduce((total, item) => {
+    const value = item[key];
+    return total + (typeof value === "number" ? value : 0);
+  }, 0);
+};
+
+export const getDaysOfWeek = () => {
+
+  return [
+    { dayOfWeek:1, nameOfDay: 'sunday'},
+    { dayOfWeek:2, nameOfDay: 'monday'},
+    { dayOfWeek:3, nameOfDay: 'tuesday'},
+    { dayOfWeek:4, nameOfDay: 'wednesday'},
+    { dayOfWeek:5, nameOfDay: 'thursday'},
+    { dayOfWeek:6, nameOfDay: 'friday'},
+    { dayOfWeek:7, nameOfDay: 'saturday'},
+  ]
+
+} 
