@@ -108,6 +108,27 @@ export type Branches = {
     timezone : string
 }
 
+export interface Branch {
+    branchId:     number;
+    branchName:   string;
+    address:      string;
+    timezone:     string;
+    phoneNumbers: string;
+    status:       string;
+    companyId:    number;
+    directions:   string;
+    postalCode:   string;
+    cities:       Cities;
+    images:       ImageBranch[];
+}
+
+export interface ImageBranch {
+    branchImageId: number;
+    branchId:      number;
+    imageUrl:      string;
+}
+
+
 
 export type ServiceCategories = {
   categoryId: number | null
@@ -238,3 +259,49 @@ export type AppointmentProjection = {
   status: string;
   photoUrl: string | null;
 };
+
+
+export interface Appointment {
+    appointmentId:         number;
+    branchId:              number;
+    date:                  string;
+    startTime:             string;
+    endTime:               string;
+    status:                string;
+    userId:                number;
+    userFirstName:         string;
+    userLastName:          string;
+    userPhone:             string;
+    userEmail:             string;
+    resourceId:            number;
+    resourceName:          string;
+    resourceType:          string;
+    totalServicesDuration: number;
+    startDateTimeUtc:      Date;
+    endDateTimeUtc:        Date;
+    services:              ServiceDTO[];
+}
+
+export interface ServiceDTO {
+    appointmentServId: number;
+    appointmentId:     number;
+    serviceId:         number;
+    serviceName:       string;
+    price:             number;
+    durationMinutes:   number;
+}
+
+
+  export interface BranchDTO {
+    address:         string;
+    profileImageUrl: null;
+    companyName:     string;
+    cityName:        string;
+    branchName:      string;
+    logoUrl:         string;
+    companyId:       number;
+    branchId:        number;
+    icon:            string;
+    description:     string; 
+    branchImages:   string | null;
+  }

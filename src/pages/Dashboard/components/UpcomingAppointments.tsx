@@ -6,6 +6,7 @@
   import { confirmCanceling, showAlertError } from "@/utils/sweetalert2";
   import { useEffect, useState } from "react";
   import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
   import Swal from "sweetalert2";
 
   type LocalResource = { resourceId: number; resourceName: string; imageUrl?: string };
@@ -175,7 +176,8 @@
           )}
 
           {appointments.slice(0,6).map((ap) => (
-            <div key={ap.appointmentId} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+            
+            <div key={ap.appointmentId} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg" >
               <img alt="Client avatar" className="h-12 w-12 rounded-full object-cover" src={ap.photoUrl || ''} />
               <div className="flex-1">
                 <p className="font-semibold text-gray-800">{ap.client}</p>
@@ -186,6 +188,8 @@
                 <p className="text-xs text-gray-500">{isToday(ap.appointmentDate) ? t('today','Today') : ap.appointmentDate}</p>
                 <div className="mt-2">
                     
+                    <Link to={`/details/branch/${ap.branchId}/appointment/${ap.appointmentId}`}
+                          className="text-sm px-3 py-1 bg-white border rounded text-gray-700 hover:bg-gray-100 mr-1">{t('details','Details')}</Link>
                     {ap.status === "P" ? (
                         <button onClick={() => confirmOrCancel(ap)} className="text-sm px-3 py-1 bg-white border rounded text-gray-700 hover:bg-gray-100">{t('manage','Manage')}</button>
                     ): ( ap.status === "C" ? (

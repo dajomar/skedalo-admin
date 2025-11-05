@@ -17,6 +17,8 @@ import { HeaderControls } from "./components/HeaderControls";
 import { ResourceHeader } from "./components/ResourceHeader";
 import { CalendarView } from "./components/CalendarView";
 import { formatDate } from "@/helpers/helpers";
+import { useNavigate } from "react-router-dom";
+
 
 export function Appointments() {
   const [resources, setResources] = useState<Resource[]>([]);
@@ -24,7 +26,8 @@ export function Appointments() {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedBranch, setSelectedBranch] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+    
+  const navigate = useNavigate();
   const { companyId } = useAuthStore();
   const { sedes, listarSedes } = useSedeStore();
   const { t } = useTranslation();
@@ -80,8 +83,19 @@ export function Appointments() {
     fetchAppointments();
   }, [fetchAppointments]);
 
+
+  const gotToAppointmentsDetails = (appointment: AppointmentProjection) => {
+
+    navigate(`/details/branch/${appointment.branchId}/appointment/${appointment.appointmentId}`, {replace:true} );
+
+  }
+
   const handleAppointmentAction = async (appointment: AppointmentProjection) => {
-    if (appointment.status !== "P") return;
+    if (appointment.status !== "P"){
+
+        gotToAppointmentsDetails(appointment);
+        return;
+    } 
 
     const result = await Swal.fire({
       title: t("confirmOrCancelAppointment"),
@@ -176,6 +190,8 @@ export function Appointments() {
           </div>
         </div>
       )}
+
+      
     </div>
   );
 }

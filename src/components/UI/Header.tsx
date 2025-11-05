@@ -68,7 +68,7 @@ export const Header = () => {
                     <button className="lg:hidden mr-4">
                         <span className="material-symbols-outlined">menu</span>
                     </button>
-                    <h2 className="mr-10 text-2xl font-bold text-gray-800">{capitalizeFirstLetter(location.pathname.substring(1))}</h2>
+                    <h2 className="mr-10 text-2xl font-bold text-gray-800">{capitalizeFirstLetter(location.pathname.substring(1).split("/")[0])}</h2>
                 </div>
                 <div className="flex items-center space-x-4">
                     <LanguageSwitcher />

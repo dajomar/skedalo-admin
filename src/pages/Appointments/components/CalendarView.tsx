@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import type { CalendarViewProps } from "../types";
 import { CALENDAR_CONFIG } from "../types";
+import { formatAvailableTime } from "@/helpers/helpers";
 
 const toMinutes = (time: string): number => {
   const [h, m] = time.split(":").map(Number);
@@ -54,9 +55,11 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
                   const startMin = toMinutes(appointment.startTime) - START_HOUR * 60;
                   const endMin = toMinutes(appointment.endTime) - START_HOUR * 60;
                   const top = startMin * PIXELS_PER_MINUTE;
-                  const height = (endMin - startMin) * PIXELS_PER_MINUTE;
+                  const height =  ((endMin - startMin) * PIXELS_PER_MINUTE) === 60 ? 70 :(endMin - startMin) * PIXELS_PER_MINUTE ;
                   const compactThreshold = 36; // px
                   const isCompact = height < compactThreshold;
+
+                  
 
                   return (
                     <div
@@ -73,19 +76,20 @@ export function CalendarView({ appointments, resources, onAppointmentAction }: C
                     >
                       {isCompact ? (
                         <div className="flex items-center justify-between text-[10px]">
-                          <span className="font-medium">{appointment.startTime}</span>
-                          <span className={`px-1 py-0.5 rounded text-[10px]`}>{appointment.status === "P" ? "⏳" : appointment.status === "C" ? "✓" : "✕"}</span>
+                          <span className="font-medium">{appointment.client} - {formatAvailableTime(appointment.startTime)} - {appointment.serviceName}</span>
+                          <span className={` material-symbols-outlined px-1 py-0.5 rounded text-[14px]`}>{appointment.status === "P" ? "⏳" : appointment.status === "C" ? "check_circle" : "close"}</span>
                         </div>
                       ) : (
                         <>
                           <div className="font-bold truncate mb-0.5">{appointment.client}</div>
                           <div className="truncate text-[10px] opacity-90">{appointment.serviceName}</div>
                           <div className="text-[10px] flex justify-between items-center mt-1">
-                            <span>{appointment.startTime} - {appointment.endTime}</span>
-                            <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-medium ${appointment.status === "P" ? "bg-yellow-500/20" : appointment.status === "C" ? "bg-green-500/20" : "bg-red-500/20"}`}>
+                            <span>{formatAvailableTime(appointment.startTime)} - {formatAvailableTime(appointment.endTime)}</span>
+                            <span className={`material-symbols-outlined px-1.5 py-0.5 rounded-full text-[14px] font-medium ${appointment.status === "P" ? "bg-yellow-500/20" : appointment.status === "C" ? "bg-green-500/20" : "bg-red-500/20"}`}>
                               {appointment.status === "P" && "⏳"}
-                              {appointment.status === "C" && "✓"}
-                              {appointment.status === "X" && "✕"}
+                              {appointment.status === "C" && "check_circle"}
+                              {appointment.status === "X" && "close"}
+                              
                             </span>
                           </div>
                         </>
