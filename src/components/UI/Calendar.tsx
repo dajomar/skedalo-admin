@@ -28,7 +28,6 @@ export default function Calendar ({ date, onDateSelect }: { date?:Date; onDateSe
     useEffect(() => {
         if (!date) return;
        handleDateSelect(date.getDate());
-        console.log("date changed in calendar:", date);
         if (onDateSelect && selectedDate){
           onDateSelect(new Date(selectedDate.year, selectedDate.month , selectedDate.day ));  
     } 

@@ -1,11 +1,9 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate  } from "react-router-dom";
 import LoadingSpinner from "./components/UI/Spinner";
 import './App.css'
 
 import { useAuthStore } from './store/authStore';
-
-
 
 const Home = lazy(() => import("./pages/home/Home"));
 const Login = lazy(() => import("./pages/Login/Login"));
@@ -17,10 +15,11 @@ const ResourcesPage = lazy(() => import("./pages/Resources/Resources"));
 const ServiceCategoriesPage = lazy(() => import("./pages/ServiceCategories/ServicesCategories"));
 const  ScheduleResource = lazy(() => import("./pages/SchedulesPages/ScheduleResource"));
 const  UserProfile = lazy(() => import("./pages/UserProfile/UserProfile"));
+const  DayViewCalendar = lazy(() => import("./pages/Appointments/Appointments"));
 
 
 const App = () => {
-  const { isAuthenticated, logout } = useAuthStore();
+    const { isAuthenticated, logout } = useAuthStore();
   
   // Verificar token expirado al cargar la app
   useEffect(() => {
@@ -42,6 +41,7 @@ const App = () => {
     const interval = setInterval(checkTokenExpiration, 60000);
     return () => clearInterval(interval);
   }, [logout]);
+  
 
   return (
     <Router>
@@ -61,6 +61,8 @@ const App = () => {
                 <Route path="/service-categories" element={<ServiceCategoriesPage />} />
                 <Route path="/schedules" element={<ScheduleResource />} />
                 <Route path="/profile" element={<UserProfile />} />
+                <Route path="/appointments" element={<DayViewCalendar />} />
+                <Route path="*" element={<Navigate to="/" />} />
               </Route>
             ) : (
               <Route path="*" element={<Navigate to="/login" />} />
