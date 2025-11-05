@@ -28,7 +28,7 @@ const cssInactiveClassMenuItem = 'text-gray-600 hover:bg-gray-100';
 
 const menu: MenuItem[] = [
     { id: 1, name: 'Dashboard', icon: 'dashboard', redirectTo: '/dashboard', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
-    { id: 2, name: 'Appointments', icon: 'calendar_today', redirectTo: '/', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
+    { id: 2, name: 'Appointments', icon: 'calendar_today', redirectTo: '/appointments', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
     { id: 3, name: 'Branches', icon: 'store', redirectTo: '/branches', cssClass: cssClassMenuItem, cssActiveClass: cssActiveClassMenuItem, cssInactiveClass: cssInactiveClassMenuItem },
     { 
         id: 4, 
