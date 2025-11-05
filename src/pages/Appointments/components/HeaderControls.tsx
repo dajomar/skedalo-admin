@@ -28,11 +28,6 @@ export function HeaderControls({
         }
     };
 
-    const prueba = (date: any) => {
-
-        console.log('preba', date)
-    }
-
     return (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-5 bg-white p-4 rounded-lg shadow-sm">
             {/* Calendar and navigation controls */}

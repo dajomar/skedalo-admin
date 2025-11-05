@@ -31,12 +31,12 @@ export default function DashBoard() {
     }, [sedes, selectedBranch]);
 
     useEffect(() => {
-        console.log("selectedDate in dashboard:", selectedDate);
+        
     }   , [selectedDate]);
 
     const prueba = (date:any) => {
 
-        console.log("prueba", date);
+        
         setCalendarDay(date);
 
     }
