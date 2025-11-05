@@ -1,8 +1,12 @@
 import type { ResourceHeaderProps } from '../types';
 
 export function ResourceHeader({ resources }: ResourceHeaderProps) {
+  // Calcula el ancho dinámico: si hay pocos recursos, reparte el ancho; si hay muchos, mínimo 150px
+  const minWidth = 150;
+  const total = resources.length;
+  const gridTemplateColumns = `60px repeat(${total}, minmax(${minWidth}px, 1fr))`;
   return (
-    <div className="grid grid-cols-[60px_repeat(auto-fill,minmax(150px,1fr))] border-b">
+    <div className="grid border-b" style={{ gridTemplateColumns }}>
       <div className="border-r"></div>
       {resources.map((resource) => (
         <div key={resource.resourceId} className="flex flex-col items-center gap-2 p-2 border-r">
