@@ -4,6 +4,7 @@ import i18n from "../../locales/i18n";
 //import { showAlertSessionExpired } from "../utils/sweetalert2";
 import { getURLApiServer } from "@/helpers/helpers";
 import { showAlertSessionExpired } from "@/utils/sweetalert2";
+import { removeFromLocalStorage } from "@/helpers/localStorage";
 
 
 const api = axios.create({
@@ -78,8 +79,30 @@ api.interceptors.request.use(async (config) => {
 });
 
 
+// Interceptor de respuesta
+api.interceptors.response.use(
+  (response) => {
+    // Si la respuesta es exitosa, simplemente la devolvemos
+    return response;
+  },
+  (error) => {
+    // Si hay respuesta del servidor y el código es 403
+    if (error.response && error.response.status === 403) {
+      console.warn('Acceso prohibido. Redirigiendo al login...');
+      // Si falla el refresh → sesión expirada
+        sessionStorage.removeItem("tokenBookify");
+        sessionStorage.removeItem("refreshTokenBookify");
+        sessionStorage.removeItem("tokenExp");
 
+        removeFromLocalStorage("auth-storage");
+        showAlertSessionExpired();
+        console.clear()
+    }
 
+    // Importante: propagar el error para no romper las promesas
+    return Promise.reject(error);
+  }
+);
 
 
 export default api;
