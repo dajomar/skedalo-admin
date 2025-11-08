@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Pagination from "@/components/UI/Pagination";
 import AddService from "@/components/UI/AddService";
+import { FooterPagination } from "@/components/UI/FooterPagination";
 
 const ServicesCompany = () => {
 
@@ -33,8 +34,7 @@ const ServicesCompany = () => {
     const [formData, setFormData] = useState<Services>(initialService);
     const [validated, setValidated] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    
     const [searchTerm, setSearchTerm] = useState("");
 
     useMemo(() => {
@@ -101,26 +101,36 @@ const ServicesCompany = () => {
     }, [services, serviceCategories, searchTerm]);
 
     // Calculate pagination
-    const totalItems = filteredServices.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
+    // const totalItems = filteredServices.length;
+    // const totalPages = Math.ceil(totalItems / itemsPerPage);
+    // const indexOfLastItem = currentPage * itemsPerPage;
+    // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    // const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
 
-    const handlePageChange = (pageNumber: number) => {
-        setCurrentPage(pageNumber);
-    };
+    // const handlePageChange = (pageNumber: number) => {
+    //     setCurrentPage(pageNumber);
+    // };
 
-    const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newItemsPerPage = parseInt(e.target.value);
-        setItemsPerPage(newItemsPerPage);
-        setCurrentPage(1); // Reset to first page when changing items per page
-    };
+    // const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     const newItemsPerPage = parseInt(e.target.value);
+    //     setItemsPerPage(newItemsPerPage);
+    //     setCurrentPage(1); // Reset to first page when changing items per page
+    // };
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
         setCurrentPage(1); // Reset to first page when searching
     };
+
+      // Información necesaria por paginación 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
+    const currentItems = filteredServices.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return <>
         <div className="flex-1 p-6 overflow-y-auto">
@@ -240,29 +250,16 @@ const ServicesCompany = () => {
                         </tbody>
                     </table>
                 </div>
-                <div className="mt-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="text-sm text-gray-600">
-                            <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-                            <select
-                                className="border border-gray-300 rounded-md py-1 px-2 focus:ring-primary focus:border-primary"
-                                id="rows_per_page"
-                                value={itemsPerPage}
-                                onChange={handleItemsPerPageChange}>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
-                    </div>
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                        totalItems={totalItems}
-                        itemsPerPage={itemsPerPage}
-                    />
-                </div>
+               
+               <FooterPagination
+                                   currentPage={currentPage}
+                                   totalPages={totalPages}
+                                   itemsPerPage={itemsPerPage}
+                                   totalItems={services.length}
+                                   onPageChange={setCurrentPage}
+                                   onItemsPerPageChange={setItemsPerPage}
+                               />
+
                 <div className="mt-6 flex justify-end space-x-3">
                     <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
                         Cancel

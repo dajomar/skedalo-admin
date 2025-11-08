@@ -1,3 +1,4 @@
+import { FooterPagination } from "@/components/UI/FooterPagination";
 import { useAuthStore } from "@/store/authStore";
 import { useResourcesStore } from "@/store/resourcesStore";
 import { useServicesStore } from "@/store/servicesStore";
@@ -41,8 +42,7 @@ export const ResourcesPage = () => {
     const [validated, setValidated] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    
 
     // Lista temporal de servicios para el recurso
     const [servicesTemp, setServicesTemp] = useState<Services[]>([]);
@@ -333,18 +333,30 @@ export const ResourcesPage = () => {
         );
     }, [resources, searchTerm]);
 
-    const totalItems = filteredResources.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredResources.slice(indexOfFirstItem, indexOfLastItem);
+    //const totalItems = filteredResources.length;
+    //const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+    //const indexOfLastItem = currentPage * itemsPerPage;
+    //const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    //let currentItems = filteredResources.slice(indexOfFirstItem, indexOfLastItem);
 
-    const handlePageChange = (page: number) => setCurrentPage(page);
-    const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setItemsPerPage(parseInt(e.target.value));
-        setCurrentPage(1);
-    };
+    // const handlePageChange = (page: number) => setCurrentPage(page);
+    // const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     setItemsPerPage(parseInt(e.target.value));
+    //     setCurrentPage(1);
+    // };
 
+    
+    // Información necesaria por paginación 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const totalPages = Math.ceil(filteredResources.length / itemsPerPage);
+    const currentItems = filteredResources.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    
 
 
     return (
@@ -422,25 +434,15 @@ export const ResourcesPage = () => {
                     </table>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-                        <select id="rows_per_page" value={itemsPerPage} onChange={handleItemsPerPageChange} className="border border-gray-300 rounded-md py-1 px-2 focus:ring-primary focus:border-primary">
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                        </select>
-                    </div>
-                    <div>
-                        {/* simple pagination controls (reusing Pagination component if available) */}
-                        {/* Importing Pagination at top would be ideal; but to avoid adding import here, show simple controls */}
-                        <div className="inline-flex items-center space-x-2">
-                            <button disabled={currentPage === 1} onClick={() => handlePageChange(Math.max(1, currentPage - 1))} className="px-3 py-1 bg-gray-100 rounded-md">Previous</button>
-                            <div className="px-3 py-1 bg-white border rounded-md">{currentPage} / {totalPages}</div>
-                            <button disabled={currentPage === totalPages} onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} className="px-3 py-1 bg-gray-100 rounded-md">Next</button>
-                        </div>
-                    </div>
-                </div>
+                 <FooterPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={resources.length}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                />
+
             </div>
 
             {/* Modal */}
@@ -551,134 +553,134 @@ export const ResourcesPage = () => {
             {/* Services modal independiente */}
             {showServicesModal && resourceForServices && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
-  <div
-    className="absolute inset-0 bg-black/40"
-    onClick={handleCloseServicesModal}
-  />
-  <div className="relative w-full max-w-2xl mx-4 bg-white rounded-lg shadow-lg p-6">
-    {/* HEADER */}
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl shadow-sm">
-        <img
-          src={resourceForServices.photoUrl || '/placeholder.png'}
-          alt="photo"
-          className="w-14 h-14 rounded-full object-cover border border-gray-200"
-        />
-        <div>
-          <h3 className="text-lg font-bold text-gray-800 leading-tight">
-            {t('resources.assignServices')}
-          </h3>
-          <span className="text-sm text-gray-500">
-            {resourceForServices.resourceName}
-          </span>
-        </div>
-      </div>
+                    <div
+                        className="absolute inset-0 bg-black/40"
+                        onClick={handleCloseServicesModal}
+                    />
+                    <div className="relative w-full max-w-2xl mx-4 bg-white rounded-lg shadow-lg p-6">
+                        {/* HEADER */}
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl shadow-sm">
+                                <img
+                                    src={resourceForServices.photoUrl || '/placeholder.png'}
+                                    alt="photo"
+                                    className="w-14 h-14 rounded-full object-cover border border-gray-200"
+                                />
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800 leading-tight">
+                                        {t('resources.assignServices')}
+                                    </h3>
+                                    <span className="text-sm text-gray-500">
+                                        {resourceForServices.resourceName}
+                                    </span>
+                                </div>
+                            </div>
 
-      <button
-        onClick={handleCloseServicesModal}
-        className="text-gray-500 hover:text-gray-700"
-      >
-        <span className="sr-only">Close</span>
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
-    </div>
+                            <button
+                                onClick={handleCloseServicesModal}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                <span className="sr-only">Close</span>
+                                <svg
+                                    className="h-6 w-6"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
 
-    {/* SERVICIOS SELECCIONADOS */}
-    {servicesTemp.some((srv) => srv.status === 'A') && (
-      <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">
-          {t('resources.selectedServices') || 'Services sélectionnés'}
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {servicesTemp
-            .filter((srv) => srv.status === 'A')
-            .map((srv) => (
-              <div
-                key={srv.serviceId}
-                className="flex items-center gap-1 bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full"
-              >
-                <span>{srv.serviceName}</span>
-                <button
-                  onClick={() => toggleActive(srv.serviceId!)}
-                  className="text-primary/70 hover:text-primary"
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-        </div>
-      </div>
-    )}
+                        {/* SERVICIOS SELECCIONADOS */}
+                        {servicesTemp.some((srv) => srv.status === 'A') && (
+                            <div className="mb-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                                    {t('resources.selectedServices') || 'Services sélectionnés'}
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {servicesTemp
+                                        .filter((srv) => srv.status === 'A')
+                                        .map((srv) => (
+                                            <div
+                                                key={srv.serviceId}
+                                                className="flex items-center gap-1 bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full"
+                                            >
+                                                <span>{srv.serviceName}</span>
+                                                <button
+                                                    onClick={() => toggleActive(srv.serviceId!)}
+                                                    className="text-primary/70 hover:text-primary"
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
 
-    {/* LISTA DE SERVICIOS */}
-    <div className="max-h-72 overflow-auto border rounded-md p-2">
-      {servicesTemp.length === 0 ? (
-        <div className="text-sm text-gray-500">
-          {t('resources.noServices') || 'No services available'}
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {servicesTemp.map((srv) => (
-            <li
-              key={srv.serviceId}
-              className="flex items-center justify-between"
-            >
-              <label className="flex items-center space-x-3 cursor-pointer w-full">
-                <input
-                  type="checkbox"
-                  checked={srv.status === 'A'}
-                  onChange={() => toggleActive(srv.serviceId!)}
-                  className="h-4 w-4 text-primary border-gray-300 rounded"
-                />
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">
-                    {srv.serviceName}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {srv.description}
-                  </div>
+                        {/* LISTA DE SERVICIOS */}
+                        <div className="max-h-72 overflow-auto border rounded-md p-2">
+                            {servicesTemp.length === 0 ? (
+                                <div className="text-sm text-gray-500">
+                                    {t('resources.noServices') || 'No services available'}
+                                </div>
+                            ) : (
+                                <ul className="space-y-2">
+                                    {servicesTemp.map((srv) => (
+                                        <li
+                                            key={srv.serviceId}
+                                            className="flex items-center justify-between"
+                                        >
+                                            <label className="flex items-center space-x-3 cursor-pointer w-full">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={srv.status === 'A'}
+                                                    onChange={() => toggleActive(srv.serviceId!)}
+                                                    className="h-4 w-4 text-primary border-gray-300 rounded"
+                                                />
+                                                <div className="min-w-0">
+                                                    <div className="text-sm font-medium text-gray-900 truncate">
+                                                        {srv.serviceName}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 truncate">
+                                                        {srv.description}
+                                                    </div>
+                                                </div>
+                                                <div className="ml-2 text-xs text-gray-500">
+                                                    {srv.durationMinutes
+                                                        ? `${srv.durationMinutes} min`
+                                                        : ''}
+                                                </div>
+                                            </label>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        {/* BOTONES */}
+                        <div className="mt-4 flex justify-end space-x-3">
+                            <button
+                                onClick={handleCloseServicesModal}
+                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                            >
+                                {t('common.cancel')}
+                            </button>
+                            <button
+                                onClick={handleSaveServices}
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                            >
+                                {t('common.save')}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div className="ml-2 text-xs text-gray-500">
-                  {srv.durationMinutes
-                    ? `${srv.durationMinutes} min`
-                    : ''}
-                </div>
-              </label>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-
-    {/* BOTONES */}
-    <div className="mt-4 flex justify-end space-x-3">
-      <button
-        onClick={handleCloseServicesModal}
-        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-      >
-        {t('common.cancel')}
-      </button>
-      <button
-        onClick={handleSaveServices}
-        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-      >
-        {t('common.save')}
-      </button>
-    </div>
-  </div>
-</div>
 
             )}
         </div>

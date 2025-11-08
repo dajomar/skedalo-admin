@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import type { Branches } from '@/types';
 import { useEffect, useMemo, useState } from "react";
 import Pagination from "@/components/UI/Pagination";
+import { FooterPagination } from "@/components/UI/FooterPagination";
 
 const Branches = () => {
 
@@ -56,8 +57,7 @@ const Branches = () => {
     const [showSedesModal, setShowSedesModal] = useState(false);
     const [formData, setFormData] = useState<Branches>(sedeInicial);
     const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+
 
     useEffect(() => {
         if (formData.cities.states?.statesPK.countryId !== "")
@@ -221,17 +221,18 @@ const Branches = () => {
         );
     }, [sedes, searchTerm]);
 
-    const totalItems = filteredSedes.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredSedes.slice(indexOfFirstItem, indexOfLastItem);
+    //const totalItems = filteredSedes.length;
+    // const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+    // const indexOfLastItem = currentPage * itemsPerPage;
+    // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    // const currentItems = filteredSedes.slice(indexOfFirstItem, indexOfLastItem);
 
-    const handlePageChange = (page: number) => setCurrentPage(page);
-    const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setItemsPerPage(parseInt(e.target.value));
-        setCurrentPage(1);
-    };
+    // const handlePageChange = (page: number) => setCurrentPage(page);
+    // const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     setItemsPerPage(parseInt(e.target.value));
+    //     setCurrentPage(1);
+    // };
+
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
         setCurrentPage(1);
@@ -242,6 +243,18 @@ const Branches = () => {
         setFormData(sedeInicial);
         setShowSedesModal(true);
     };
+
+
+  // Información necesaria por paginación 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const totalPages = Math.ceil(filteredSedes.length / itemsPerPage);
+    const currentItems = filteredSedes.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
 
     return (
         <div className="flex-1 p-6 overflow-y-auto">
@@ -300,17 +313,16 @@ const Branches = () => {
                     </table>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-                        <select id="rows_per_page" value={itemsPerPage} onChange={handleItemsPerPageChange} className="border border-gray-300 rounded-md py-1 px-2 focus:ring-primary focus:border-primary">
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                        </select>
-                    </div>
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} totalItems={totalItems} itemsPerPage={itemsPerPage} />
-                </div>
+
+                <FooterPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={sedes.length}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                />
+
             </div>
 
             {/* Modal: form for add/edit branch */}
@@ -368,8 +380,8 @@ const Branches = () => {
                                         <option value="">-- Select Status --</option>
                                         <option value="A">Active</option>
                                         <option value="I">Inactive</option>
-                                        
-                                    </select> 
+
+                                    </select>
                                 </div>
 
                                 <div>

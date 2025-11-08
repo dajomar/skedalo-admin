@@ -7,6 +7,7 @@ import { showAlertError, showAlertInfo, confirmCanceling } from "@/utils/sweetal
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Pagination from "@/components/UI/Pagination";
+import { FooterPagination } from "@/components/UI/FooterPagination";
 
 
 
@@ -23,9 +24,7 @@ export const ScheduleResource = () => {
     const [selectedSede, setSelectedSede] = useState<Branches | null>(null);
     const [editableSchedules, setEditableSchedules] = useState<Schedules[]>([]);
     const [isEditing, setIsEditing] = useState(false);
-    // pagination for resources list
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    
     // search filter
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -62,13 +61,7 @@ export const ScheduleResource = () => {
         );
     }, [resources, searchTerm]);
 
-    // Resources pagination
-    const totalResources = filteredResources.length;
-    const totalPagesResources = Math.max(1, Math.ceil(totalResources / itemsPerPage));
-    const currentResources = useMemo(() => {
-        const start = (currentPage - 1) * itemsPerPage;
-        return filteredResources.slice(start, start + itemsPerPage);
-    }, [filteredResources, currentPage, itemsPerPage]);
+    
 
 
     useEffect(() => {
@@ -178,6 +171,17 @@ export const ScheduleResource = () => {
         setIsEditing(false);
     };
 
+      // Información necesaria por paginación 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const totalPages = Math.ceil(filteredResources.length / itemsPerPage);
+    const currentItems = filteredResources.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+
     return (
         <div className="p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-4">{t('schedule-resource', 'Schedule Resource')}</h2>
@@ -213,7 +217,7 @@ export const ScheduleResource = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {currentResources.map((res, idx) => (
+                            {currentItems.map((res, idx) => (
                                 <tr key={res.resourceId} className="hover:bg-gray-50">
                                     <td className="px-6 py-4 whitespace-nowrap w-12">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                                     <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-900 flex items-center">
@@ -249,17 +253,17 @@ export const ScheduleResource = () => {
                         </tbody>
                     </table>
                 </div>
-                <div className="mt-4 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-                        <select id="rows_per_page" value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="border border-gray-300 rounded-md py-1 px-2">
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                        </select>
-                    </div>
-                    <Pagination currentPage={currentPage} totalPages={totalPagesResources} onPageChange={(p) => setCurrentPage(p)} totalItems={totalResources} itemsPerPage={itemsPerPage} />
-                </div>
+
+
+                  <FooterPagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    itemsPerPage={itemsPerPage}
+                                    totalItems={resources.length}
+                                    onPageChange={setCurrentPage}
+                                    onItemsPerPageChange={setItemsPerPage}
+                                />
+
             </div>
 
             {/* Modal: Edit schedules for selected resource */}

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Pagination from "@/components/UI/Pagination";
 import AddCategory from "@/components/UI/AddCategory";
+import { FooterPagination } from "@/components/UI/FooterPagination";
 
 
 export const ServiceCategoriesPage = () => {
@@ -29,9 +30,6 @@ export const ServiceCategoriesPage = () => {
   const [validated, setValidated] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Pagination & Search
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
 
   useMemo(() => {
@@ -98,14 +96,6 @@ export const ServiceCategoriesPage = () => {
     );
   }, [serviceCategories, searchTerm]);
 
-  const totalItems = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-
-  const paginated = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filtered.slice(start, start + itemsPerPage);
-  }, [filtered, currentPage, itemsPerPage]);
-
   const changePage = (page: number) => setCurrentPage(page);
 
   const openAddModal = () => { setFormData(initialCategory); setShowModal(true); };
@@ -114,6 +104,17 @@ export const ServiceCategoriesPage = () => {
 
   const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => { const newItems = parseInt(e.target.value); setItemsPerPage(newItems); setCurrentPage(1); };
 
+  
+    // Información necesaria por paginación 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const currentItems = filtered.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+  
   return (
     <div className="flex-1 p-6 overflow-y-auto">
       <div className="bg-white p-6 rounded-lg shadow mb-6">
@@ -157,7 +158,7 @@ export const ServiceCategoriesPage = () => {
             </thead>
 
             <tbody className="bg-white divide-y divide-gray-200">
-              {paginated.map((cat) => (
+              {currentItems.map((cat) => (
                 <tr key={cat.categoryId} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap w-12">
                     <input className="rounded border-gray-300 text-primary focus:ring-primary" type="checkbox" />
@@ -174,29 +175,17 @@ export const ServiceCategoriesPage = () => {
             </tbody>
           </table>
         </div>
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-sm text-gray-600">
-              <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-              <select
-                className="border border-gray-300 rounded-md py-1 px-2 focus:ring-primary focus:border-primary"
-                id="rows_per_page"
-                value={itemsPerPage}
-                onChange={handleItemsPerPageChange}>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-              </select>
-            </div>
-          </div>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={changePage}
-            totalItems={totalItems}
-            itemsPerPage={itemsPerPage}
-          />
-        </div>
+
+    
+          <FooterPagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            itemsPerPage={itemsPerPage}
+                            totalItems={serviceCategories.length}
+                            onPageChange={setCurrentPage}
+                            onItemsPerPageChange={setItemsPerPage}
+                        />
+
         <AddCategory isOpen={showModal} onClose={() => setShowModal(false)} initialCategory={formData} />
     </div>
     </div>
