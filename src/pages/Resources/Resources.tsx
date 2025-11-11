@@ -544,30 +544,32 @@ export const ResourcesPage = () => {
 
             {/* Modal */}
             {showModal && (
-
                 <>
-                    <AddNewResource onShowModal={setShowModal} formData={formData}
-                                    previewPhotoUrl={previewPhotoUrl}
-                                    sedes={sedes}
-                                    validated={false}
-                                    onHandleSubmit={handleSubmit}
-                                    onHandleInputChange={handleInputChange} 
-                                    onHandlePhotoChange={handlePhotoChange} />
-
+                    <AddNewResource
+                        isOpen={showModal}
+                        onClose={() => setShowModal(false)}
+                        formData={formData}
+                        previewPhotoUrl={previewPhotoUrl}
+                        sedes={sedes}
+                        validated={validated}
+                        onHandleSubmit={handleSubmit}
+                        onHandleInputChange={handleInputChange}
+                        onHandlePhotoChange={handlePhotoChange}
+                    />
                 </>
             )}
 
 
             {/* Services modal independiente */}
             {showServicesModal && resourceForServices && (
-
-                <AddServiceToResource resourceForServices={resourceForServices} 
-                                     servicesTemp={servicesTemp} 
-                                     onToggleActive={(serviceId)=> toggleActive(serviceId) } 
-                                     onHandleCloseServicesModal={handleCloseServicesModal} 
-                                     onHandleSaveServices={handleSaveServices} 
-                                     />
-
+                <AddServiceToResource
+                    isOpen={showServicesModal}
+                    onClose={handleCloseServicesModal}
+                    resourceForServices={resourceForServices}
+                    servicesTemp={servicesTemp}
+                    onToggleActive={toggleActive}
+                    onHandleSaveServices={handleSaveServices}
+                />
             )}
 
             {/* Service modal de horario */}
