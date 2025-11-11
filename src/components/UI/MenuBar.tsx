@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next'
 
 import { NavLink } from 'react-router-dom';
@@ -64,6 +64,36 @@ export default function MenuBar() {
                 : [...prev, itemId]
         );
     };
+
+    // Block body scroll when mobile menu is open
+    useEffect(() => {
+        // Only apply on mobile screens (< 1024px based on lg: breakpoint)
+        const isMobile = window.innerWidth < 1024;
+        
+        if (isOpen && isMobile) {
+            // Save current scroll position
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+        } else {
+            // Restore scroll position
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
+        }
+
+        return () => {
+            // Cleanup on unmount
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+        };
+    }, [isOpen]);
 
 
     return (
@@ -159,6 +189,7 @@ export default function MenuBar() {
                                                 : menuItem.cssInactiveClass
                                         }`
                                     }
+                                    onClick={toggleMenu}
                                 >
                                     <span className="material-symbols-outlined mr-3">{menuItem.icon}</span>
                                     {menuItem.name}
