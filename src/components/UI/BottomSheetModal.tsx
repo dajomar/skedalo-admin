@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
 
@@ -33,6 +33,33 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 }) => {
     const [touchStart, setTouchStart] = useState(0);
     const [touchEnd, setTouchEnd] = useState(0);
+
+    // Block body scroll when modal is open
+    useEffect(() => {
+        if (isOpen) {
+            // Save current scroll position
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+        } else {
+            // Restore scroll position
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
+        }
+
+        return () => {
+            // Cleanup on unmount
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -75,7 +102,10 @@ const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 
             {/* Modal Container - Bottom Sheet on mobile, centered modal on desktop */}
             <div
-                className={`relative w-full ${maxWidthClasses[maxWidth]} h-[85vh] sm:max-h-[90vh] bg-white rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col animate-slide-up sm:animate-none overflow-hidden`}
+                className={`relative w-full ${maxWidthClasses[maxWidth]} bg-white shadow-2xl flex flex-col animate-slide-up sm:animate-none overflow-hidden
+                    max-h-[92dvh] rounded-t-3xl sm:max-h-[90vh] sm:rounded-xl
+                    pb-[env(safe-area-inset-bottom)] sm:pb-0
+                `}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
