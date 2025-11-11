@@ -68,10 +68,31 @@ export default function MenuBar() {
 
     return (
         <>
-            <button className="lg:hidden m-4 p-2 bg-white text-black text-white rounded-lg fixed z-50"
+            {/* Hamburger Menu Button - Mobile Only */}
+            <button 
+                className={`lg:hidden fixed top-4 z-50 p-2.5 bg-white rounded-lg shadow-lg border border-gray-200 hover:bg-gray-50 active:scale-95 transition-all duration-300 ${
+                    isOpen ? 'left-[200px]' : 'left-4'
+                }`}
                 onClick={toggleMenu}
+                aria-label="Toggle menu"
             >
-                <span className="material-symbols-outlined">menu</span>
+                <div className="w-6 h-5 flex flex-col justify-between">
+                    <span 
+                        className={`block h-0.5 bg-gray-700 rounded-full transition-all duration-300 ${
+                            isOpen ? 'rotate-45 translate-y-2' : ''
+                        }`}
+                    />
+                    <span 
+                        className={`block h-0.5 bg-gray-700 rounded-full transition-all duration-300 ${
+                            isOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'
+                        }`}
+                    />
+                    <span 
+                        className={`block h-0.5 bg-gray-700 rounded-full transition-all duration-300 ${
+                            isOpen ? '-rotate-45 -translate-y-2' : ''
+                        }`}
+                    />
+                </div>
             </button>
 
             {/* <aside className="w-64 flex-shrink-0 bg-white text-gray-800 hidden lg:flex flex-col"> */}
@@ -80,7 +101,7 @@ export default function MenuBar() {
           fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 z-40
           transform transition-transform duration-300
           ${isOpen ? 'translate-x-0' : '-translate-x-full'} 
-          lg:translate-x-0 lg:static lg:flex lg:flex-col
+          lg:translate-x-0 lg:static lg:h-screen lg:flex lg:flex-col
         `}
             >
 
