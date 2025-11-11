@@ -379,54 +379,156 @@ export const ResourcesPage = () => {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {currentItems.map((r) => (
-                                <tr key={r.resourceId ?? Math.random()} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.resourceId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-900 flex items-center">
-                                        {r.photoUrl ? (
-                                            <img src={r.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-10 h-10 rounded-full mr-3 object-cover" />
-                                        ) : (
-                                            <span className="flex-shrink-0 text-4xl rounded-full bg-cover bg-center material-symbols-outlined dark:text-text-dark"> person </span>
-                                        )}
-                                        <div>
-                                            <div>{r.resourceName}</div>
-                                            <div className="text-xs text-gray-500">{r.description}</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sedes.find(s => s.branchId === r.branchId)?.branchName || '-'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.resourceType}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.maxCapacity}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.status}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex items-center justify-end space-x-2">
-                                            <button onClick={() => handleSelectResource(r)} className="text-primary hover:text-primary/70" title={t('common.edit')}>
-                                                <span className="material-symbols-outlined text-base">edit</span>
-                                            </button>
-                                            <button onClick={() => handleOpenServicesModal(r)} className="text-primary hover:text-primary/70" title={t('resources.manageServices') || 'Manage services'}>
-                                                <span className="material-symbols-outlined text-base">assignment</span>
-                                            </button>
-                                            <button onClick={() => { handleSelectScheduleResource(r); setShowSheduleModal(true); }} className="text-primary hover:text-primary/70" title={t('common.edit')}>
-                                                <span className="text-4xl material-symbols-outlined text-base">schedule</span>
-                                            </button>
-                                        </div>
-                                    </td>
+                    {/* Desktop table view */}
+                    <div className="hidden md:block">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('resource', 'Resource')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('branch', 'Branch')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('type', 'Type')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('capacity', 'Capacity')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('status', 'Status')}</th>
+                                    <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {currentItems.map((r) => (
+                                    <tr key={r.resourceId ?? Math.random()} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">#{r.resourceId}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                {r.photoUrl ? (
+                                                    <img src={r.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-10 h-10 rounded-full mr-3 object-cover border-2 border-gray-200" />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-full mr-3 bg-gray-100 flex items-center justify-center">
+                                                        <span className="material-symbols-outlined text-gray-400 text-xl">person</span>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900">{r.resourceName}</div>
+                                                    <div className="text-xs text-gray-500 truncate max-w-xs">{r.description}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {sedes.find(s => s.branchId === r.branchId)?.branchName || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                r.resourceType === 'P' ? 'bg-blue-100 text-blue-800' : 
+                                                r.resourceType === 'L' ? 'bg-purple-100 text-purple-800' : 
+                                                'bg-gray-100 text-gray-800'
+                                            }`}>
+                                                {r.resourceType === 'P' ? t('person', 'Person') : r.resourceType === 'L' ? t('location', 'Location') : t('other', 'Other')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <span className="flex items-center">
+                                                <span className="material-symbols-outlined text-gray-400 text-base mr-1">groups</span>
+                                                {r.maxCapacity}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                r.status === 'A' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}>
+                                                {r.status === 'A' ? t('active', 'Active') : t('inactive', 'Inactive')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex items-center justify-end space-x-1">
+                                                <button onClick={() => handleSelectResource(r)} className="p-2 text-primary hover:bg-primary/10 rounded-md transition-colors" title={t('common.edit')}>
+                                                    <span className="material-symbols-outlined text-lg">edit</span>
+                                                </button>
+                                                <button onClick={() => handleOpenServicesModal(r)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title={t('resources.manageServices') || 'Manage services'}>
+                                                    <span className="material-symbols-outlined text-lg">assignment</span>
+                                                </button>
+                                                <button onClick={() => { handleSelectScheduleResource(r); setShowSheduleModal(true); }} className="p-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors" title={t('schedule', 'Schedule')}>
+                                                    <span className="material-symbols-outlined text-lg">schedule</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile card view */}
+                    <div className="md:hidden space-y-4">
+                        {currentItems.length === 0 && (
+                            <div className="text-center py-8 text-gray-500">
+                                <span className="material-symbols-outlined text-5xl mb-2">folder_off</span>
+                                <p>{t('no-resources-found', 'No resources found')}</p>
+                            </div>
+                        )}
+                        
+                        {currentItems.map((r) => (
+                            <div key={r.resourceId ?? Math.random()} className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center flex-1">
+                                        {r.photoUrl ? (
+                                            <img src={r.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-12 h-12 rounded-full mr-3 object-cover border-2 border-gray-200" />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full mr-3 bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                                <span className="material-symbols-outlined text-gray-400 text-2xl">person</span>
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-sm font-semibold text-gray-900 truncate">{r.resourceName}</h3>
+                                            <p className="text-xs text-gray-500 truncate">{r.description}</p>
+                                            <span className="text-xs text-gray-400">#{r.resourceId}</span>
+                                        </div>
+                                    </div>
+                                    <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                                        r.status === 'A' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {r.status === 'A' ? t('active', 'Active') : t('inactive', 'Inactive')}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('branch', 'Branch')}</p>
+                                        <p className="text-sm font-medium text-gray-900">{sedes.find(s => s.branchId === r.branchId)?.branchName || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('type', 'Type')}</p>
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                            r.resourceType === 'P' ? 'bg-blue-100 text-blue-800' : 
+                                            r.resourceType === 'L' ? 'bg-purple-100 text-purple-800' : 
+                                            'bg-gray-100 text-gray-800'
+                                        }`}>
+                                            {r.resourceType === 'P' ? t('person', 'Person') : r.resourceType === 'L' ? t('location', 'Location') : t('other', 'Other')}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('capacity', 'Capacity')}</p>
+                                        <p className="text-sm font-medium text-gray-900 flex items-center">
+                                            <span className="material-symbols-outlined text-gray-400 text-base mr-1">groups</span>
+                                            {r.maxCapacity}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-3 border-t">
+                                    <button onClick={() => handleSelectResource(r)} className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-primary/10 text-primary rounded-md text-sm font-medium hover:bg-primary/20 transition-colors">
+                                        <span className="material-symbols-outlined text-base mr-1">edit</span>
+                                        {t('edit', 'Edit')}
+                                    </button>
+                                    <button onClick={() => handleOpenServicesModal(r)} className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100 transition-colors">
+                                        <span className="material-symbols-outlined text-base mr-1">assignment</span>
+                                        {t('services', 'Services')}
+                                    </button>
+                                    <button onClick={() => { handleSelectScheduleResource(r); setShowSheduleModal(true); }} className="flex items-center justify-center px-3 py-2 bg-purple-50 text-purple-600 rounded-md hover:bg-purple-100 transition-colors">
+                                        <span className="material-symbols-outlined text-lg">schedule</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 <FooterPagination
