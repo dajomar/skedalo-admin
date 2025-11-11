@@ -7,6 +7,9 @@ import type { Resources, ResourcesServices, ResourcesServicesDTO, Services } fro
 import { showAlertError, showAlertInfo, showAlertWarning } from "@/utils/sweetalert2";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AddNewResource } from "./components/AddNewResource";
+import { AddServiceToResource } from "./components/AddServiceToResource";
+import { ScheduleResource } from "../SchedulesPages/ScheduleResource";
 
 
 export const ResourcesPage = () => {
@@ -42,13 +45,18 @@ export const ResourcesPage = () => {
     const [validated, setValidated] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    
+
 
     // Lista temporal de servicios para el recurso
     const [servicesTemp, setServicesTemp] = useState<Services[]>([]);
     // Modal para asignar servicios a un recurso
     const [showServicesModal, setShowServicesModal] = useState(false);
     const [resourceForServices, setResourceForServices] = useState<Resources | null>(null);
+
+    const [showScheduleModal, setShowSheduleModal] = useState<boolean>(false);
+    const [isEditing, setIsEditing] = useState<boolean>(false);  
+    const [selectScheduleResource, setSelectScheduleResource] = useState<Resources | null>(null); 
+    
 
     useMemo(() => {
         if (resources.length === 0) listResourcesByCompany(companyId);
@@ -57,15 +65,6 @@ export const ResourcesPage = () => {
         if (resourcesServices.length > 0) cleanResourcesServices();
         // eslint-disable-next-line
     }, [companyId]);
-
-    /*useEffect(() => {
-      // Cuando lleguen los servicios (solo los activos), todos se pondrán inactivos por defecto
-      const inactivos = services.filter(srv=> srv.status==="A").map((srv) => ({
-        ...srv,
-        status: "I",
-      }));
-      setServicesTemp(inactivos);
-    }, [services]);*/
 
     const handleInputChange = (
         e: React.ChangeEvent<
@@ -116,6 +115,12 @@ export const ResourcesPage = () => {
         setPreviewPhotoUrl(res.photoUrl || "");
         await listByBranchAndResource(res.branchId, res.resourceId || 0);
         setShowModal(true);
+    };
+
+    const handleSelectScheduleResource = (resource: Resources) => {
+        setSelectScheduleResource(resource);
+        setShowModal(false);
+        setIsEditing(false);
     };
 
     // Abrir modal independiente para gestionar servicios del recurso
@@ -333,19 +338,6 @@ export const ResourcesPage = () => {
         );
     }, [resources, searchTerm]);
 
-    //const totalItems = filteredResources.length;
-    //const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-    //const indexOfLastItem = currentPage * itemsPerPage;
-    //const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    //let currentItems = filteredResources.slice(indexOfFirstItem, indexOfLastItem);
-
-    // const handlePageChange = (page: number) => setCurrentPage(page);
-    // const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    //     setItemsPerPage(parseInt(e.target.value));
-    //     setCurrentPage(1);
-    // };
-
-    
     // Información necesaria por paginación 
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -356,7 +348,7 @@ export const ResourcesPage = () => {
         currentPage * itemsPerPage
     );
 
-    
+
 
 
     return (
@@ -426,6 +418,9 @@ export const ResourcesPage = () => {
                                             <button onClick={() => handleOpenServicesModal(r)} className="text-primary hover:text-primary/70" title={t('resources.manageServices') || 'Manage services'}>
                                                 <span className="material-symbols-outlined text-base">assignment</span>
                                             </button>
+                                            <button onClick={() => { handleSelectScheduleResource(r); setShowSheduleModal(true); }} className="text-primary hover:text-primary/70" title={t('common.edit')}>
+                                                <span className="text-4xl material-symbols-outlined text-base">schedule</span>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -434,7 +429,7 @@ export const ResourcesPage = () => {
                     </table>
                 </div>
 
-                 <FooterPagination
+                <FooterPagination
                     currentPage={currentPage}
                     totalPages={totalPages}
                     itemsPerPage={itemsPerPage}
@@ -447,242 +442,54 @@ export const ResourcesPage = () => {
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => setShowModal(false)} />
-                    <div className="relative w-full max-w-3xl mx-4 bg-white rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
-                        <div className="p-4 border-b">
-                            <h3 className="text-lg font-semibold">{formData.resourceId ? 'Edit Resource' : 'Add New Resource'}</h3>
-                        </div>
-                        <form className="p-6" noValidate onSubmit={handleSubmit}>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Resource name</label>
-                                    <input name="resourceName" value={formData.resourceName} onChange={handleInputChange} required className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary ${validated && !formData.resourceName ? 'border-red-500' : ''}`} />
-                                </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Branch</label>
-                                    <select name="branchId" value={formData.branchId} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value={0}>-- Select branch --</option>
-                                        {sedes.map(s => <option key={s.branchId ?? 0} value={s.branchId ?? 0}>{s.branchName}</option>)}
-                                    </select>
-                                </div>
+                <>
+                    <AddNewResource onShowModal={setShowModal} formData={formData}
+                                    previewPhotoUrl={previewPhotoUrl}
+                                    sedes={sedes}
+                                    validated={false}
+                                    onHandleSubmit={handleSubmit}
+                                    onHandleInputChange={handleInputChange} 
+                                    onHandlePhotoChange={handlePhotoChange} />
 
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Type</label>
-                                    <select name="resourceType" value={formData.resourceType} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="P">Person</option>
-                                        <option value="L">Location</option>
-                                        <option value="O">Other</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Max capacity</label>
-                                    <input name="maxCapacity" type="number" value={formData.maxCapacity} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div className="sm:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Description</label>
-                                    <textarea name="description" value={formData.description} onChange={handleInputChange} rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Phone</label>
-                                    <input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                                    <input name="email" value={formData.email} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Photo</label>
-                                    <input type="file" accept="image/*" onChange={handlePhotoChange} className="mt-1 block w-full" />
-                                    {previewPhotoUrl && <img src={previewPhotoUrl} alt="preview" className="mt-2 w-24 h-24 object-cover rounded-md" />}
-                                </div>
-
-                                {/* Services assignment list - allow toggling which services are assigned to the resource */}
-                                {/* <div className="sm:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Services</label>
-                                    <div className="mt-2 border rounded-md p-2 max-h-48 overflow-auto">
-                                        {servicesTemp.length === 0 ? (
-                                            <div className="text-sm text-gray-500">No services available</div>
-                                        ) : (
-                                            <ul className="space-y-2">
-                                                {servicesTemp.map((srv) => (
-                                                    <li key={srv.serviceId} ref={itemRef} className="flex items-center justify-between">
-                                                        <label className="flex items-center space-x-3 cursor-pointer w-full">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={srv.status === 'A'}
-                                                                onChange={() => toggleActive(srv.serviceId!)}
-                                                                className="h-4 w-4 text-primary border-gray-300 rounded"
-                                                            />
-                                                            <div className="min-w-0">
-                                                                <div className="text-sm font-medium text-gray-900 truncate">{srv.serviceName}</div>
-                                                                <div className="text-xs text-gray-500 truncate">{srv.description}</div>
-                                                            </div>
-                                                            <div className="ml-2 text-xs text-gray-500">{srv.durationMinutes ? `${srv.durationMinutes} min` : ''}</div>
-                                                        </label>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                </div> */}
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Status</label>
-                                    <select name="status" value={formData.status} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="A">Active</option>
-                                        <option value="I">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 flex justify-end space-x-3">
-                                <button type="button" onClick={() => { setShowModal(false); }} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Save</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                </>
             )}
+
+
             {/* Services modal independiente */}
             {showServicesModal && resourceForServices && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div
-                        className="absolute inset-0 bg-black/40"
-                        onClick={handleCloseServicesModal}
-                    />
-                    <div className="relative w-full max-w-2xl mx-4 bg-white rounded-lg shadow-lg p-6">
-                        {/* HEADER */}
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl shadow-sm">
-                                <img
-                                    src={resourceForServices.photoUrl || '/placeholder.png'}
-                                    alt="photo"
-                                    className="w-14 h-14 rounded-full object-cover border border-gray-200"
-                                />
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-800 leading-tight">
-                                        {t('resources.assignServices')}
-                                    </h3>
-                                    <span className="text-sm text-gray-500">
-                                        {resourceForServices.resourceName}
-                                    </span>
-                                </div>
-                            </div>
 
-                            <button
-                                onClick={handleCloseServicesModal}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                <span className="sr-only">Close</span>
-                                <svg
-                                    className="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-
-                        {/* SERVICIOS SELECCIONADOS */}
-                        {servicesTemp.some((srv) => srv.status === 'A') && (
-                            <div className="mb-4">
-                                <h4 className="text-sm font-medium text-gray-700 mb-2">
-                                    {t('resources.selectedServices') || 'Services sélectionnés'}
-                                </h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {servicesTemp
-                                        .filter((srv) => srv.status === 'A')
-                                        .map((srv) => (
-                                            <div
-                                                key={srv.serviceId}
-                                                className="flex items-center gap-1 bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full"
-                                            >
-                                                <span>{srv.serviceName}</span>
-                                                <button
-                                                    onClick={() => toggleActive(srv.serviceId!)}
-                                                    className="text-primary/70 hover:text-primary"
-                                                >
-                                                    &times;
-                                                </button>
-                                            </div>
-                                        ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* LISTA DE SERVICIOS */}
-                        <div className="max-h-72 overflow-auto border rounded-md p-2">
-                            {servicesTemp.length === 0 ? (
-                                <div className="text-sm text-gray-500">
-                                    {t('resources.noServices') || 'No services available'}
-                                </div>
-                            ) : (
-                                <ul className="space-y-2">
-                                    {servicesTemp.map((srv) => (
-                                        <li
-                                            key={srv.serviceId}
-                                            className="flex items-center justify-between"
-                                        >
-                                            <label className="flex items-center space-x-3 cursor-pointer w-full">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={srv.status === 'A'}
-                                                    onChange={() => toggleActive(srv.serviceId!)}
-                                                    className="h-4 w-4 text-primary border-gray-300 rounded"
-                                                />
-                                                <div className="min-w-0">
-                                                    <div className="text-sm font-medium text-gray-900 truncate">
-                                                        {srv.serviceName}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500 truncate">
-                                                        {srv.description}
-                                                    </div>
-                                                </div>
-                                                <div className="ml-2 text-xs text-gray-500">
-                                                    {srv.durationMinutes
-                                                        ? `${srv.durationMinutes} min`
-                                                        : ''}
-                                                </div>
-                                            </label>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-
-                        {/* BOTONES */}
-                        <div className="mt-4 flex justify-end space-x-3">
-                            <button
-                                onClick={handleCloseServicesModal}
-                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-                            >
-                                {t('common.cancel')}
-                            </button>
-                            <button
-                                onClick={handleSaveServices}
-                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-                            >
-                                {t('common.save')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <AddServiceToResource resourceForServices={resourceForServices} 
+                                     servicesTemp={servicesTemp} 
+                                     onToggleActive={(serviceId)=> toggleActive(serviceId) } 
+                                     onHandleCloseServicesModal={handleCloseServicesModal} 
+                                     onHandleSaveServices={handleSaveServices} 
+                                     />
 
             )}
+
+            {/* Service modal de horario */}
+            {showScheduleModal && selectScheduleResource && (
+                <>
+                {/* <ScheduleResourceModal resource={ selectedResource } editableSchedules={editableSchedules} 
+                                                          isEditing={isEditing} 
+                                                          daysOfWeek={daysOfWeek} 
+                                                          onShowModal={(isVisible)=>{setShowModal(isVisible)}} 
+                                                          onIsEditing={(isEditing) => {setIsEditing(isEditing)}} 
+                                                          onHandleChange={(i,day,value) => handleChange(i, 'dayOfWeek', Number(value))} 
+                                                          onHandleAddRow={handleAddRow} 
+                                                          onHandleDeleteRow={(rowId) => handleDeleteRow(rowId)} 
+                                                          onHandleSave={handleSave} 
+                                                          onHandleCancel={handleCancel} 
+                                                          /> */}
+                
+                <ScheduleResource resourceSelected={selectScheduleResource}
+                                      showModalSchedule={ (isVisible) => {setShowSheduleModal(isVisible)} }  
+                /> 
+
+
+                </>
+            ) }
         </div>
     );
 }
