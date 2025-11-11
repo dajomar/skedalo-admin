@@ -321,15 +321,6 @@ const ServicesCompany = () => {
                                    onPageChange={setCurrentPage}
                                    onItemsPerPageChange={setItemsPerPage}
                                />
-
-                <div className="mt-6 flex justify-end space-x-3">
-                    <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                        Cancel
-                    </button>
-                    <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-                        Save Changes
-                    </button>
-                </div>
             </div>
         </div>
         

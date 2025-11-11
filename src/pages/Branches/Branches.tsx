@@ -8,6 +8,7 @@ import type { Branches } from '@/types';
 import { useEffect, useMemo, useState } from "react";
 import Pagination from "@/components/UI/Pagination";
 import { FooterPagination } from "@/components/UI/FooterPagination";
+import BottomSheetModal from "@/components/UI/BottomSheetModal";
 
 const Branches = () => {
 
@@ -57,8 +58,6 @@ const Branches = () => {
     const [showSedesModal, setShowSedesModal] = useState(false);
     const [formData, setFormData] = useState<Branches>(sedeInicial);
     const [searchTerm, setSearchTerm] = useState("");
-    const [touchStart, setTouchStart] = useState(0);
-    const [touchEnd, setTouchEnd] = useState(0);
 
 
     useEffect(() => {
@@ -246,23 +245,6 @@ const Branches = () => {
         setShowSedesModal(true);
     };
 
-    // Handle bottom sheet swipe down to close on mobile
-    const handleTouchStart = (e: React.TouchEvent) => {
-        setTouchStart(e.targetTouches[0].clientY);
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        setTouchEnd(e.targetTouches[0].clientY);
-    };
-
-    const handleTouchEnd = () => {
-        if (touchStart - touchEnd < -100) {
-            // Swiped down more than 100px
-            setShowSedesModal(false);
-            setValidated(false);
-        }
-    };
-
 
   // Información necesaria por paginación 
     const [currentPage, setCurrentPage] = useState(1);
@@ -424,239 +406,204 @@ const Branches = () => {
             </div>
 
             {/* Modal: form for add/edit branch */}
-            {showSedesModal && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-6">
-                    {/* Backdrop */}
-                    <div 
-                        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300" 
-                        onClick={() => setShowSedesModal(false)} 
-                    />
-                    
-                    {/* Modal Container - Bottom Sheet on mobile, centered modal on desktop */}
-                    <div 
-                        className="relative w-full sm:max-w-3xl h-[85vh] sm:max-h-[90vh] bg-white rounded-t-3xl sm:rounded-xl shadow-2xl flex flex-col animate-slide-up sm:animate-none overflow-hidden"
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                    >
-                        {/* Drag indicator for mobile */}
-                        <div className="flex justify-center pt-3 pb-2 sm:hidden flex-shrink-0">
-                            <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-                        </div>
-                        
-                        {/* Header - Fixed */}
-                        <div className="flex items-center justify-between px-4 py-3 sm:p-6 border-b border-gray-200 flex-shrink-0">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                                    <span className="material-symbols-outlined text-primary text-xl">store</span>
-                                </div>
-                                <div>
-                                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
-                                        {formData.branchId ? t('edit', 'Edit') + ' ' + t('branch', 'Branch') : t('add', 'Add') + ' ' + t('branch', 'Branch')}
-                                    </h3>
-                                    <p className="text-sm text-gray-500">{formData.branchId ? `ID: #${formData.branchId}` : t('create-new-branch', 'Create a new branch')}</p>
-                                </div>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setShowSedesModal(false)}
-                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                                <span className="material-symbols-outlined">close</span>
-                            </button>
-                        </div>
-
-                        {/* Form Content - Scrollable */}
-                        <form noValidate onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-                            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                                <div className="space-y-6">
-                                    {/* Basic Information Section */}
-                                    <div>
-                                        <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
-                                            <span className="material-symbols-outlined text-primary text-lg mr-2">info</span>
-                                            {t('basic-information', 'Basic Information')}
-                                        </h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="sm:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('branch-name', 'Branch Name')} <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    name="branchName"
-                                                    value={formData.branchName}
-                                                    onChange={handleInputChange}
-                                                    required
-                                                    placeholder={t('enter-branch-name', 'Enter branch name')}
-                                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
-                                                        validated && !formData.branchName ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                                                    }`}
-                                                />
-                                                {validated && !formData.branchName && (
-                                                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                                                        <span className="material-symbols-outlined text-sm mr-1">error</span>
-                                                        {t('field-required', 'This field is required')}
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            <div className="sm:col-span-2">
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('address', 'Address')}
-                                                </label>
-                                                <input
-                                                    name="address"
-                                                    value={formData.address}
-                                                    onChange={handleInputChange}
-                                                    placeholder={t('enter-address', 'Enter full address')}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('phone', 'Phone Number')}
-                                                </label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">phone</span>
-                                                    <input
-                                                        name="phoneNumbers"
-                                                        value={formData.phoneNumbers}
-                                                        onChange={handleInputChange}
-                                                        placeholder="+1 234 567 8900"
-                                                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('status', 'Status')}
-                                                </label>
-                                                <select
-                                                    name="status"
-                                                    value={formData.status || ''}
-                                                    onChange={handleSelectChange}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                                                >
-                                                    <option value="">-- {t('select-status', 'Select Status')} --</option>
-                                                    <option value="A">✓ {t('active', 'Active')}</option>
-                                                    <option value="I">✕ {t('inactive', 'Inactive')}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Location Section */}
-                                    <div>
-                                        <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
-                                            <span className="material-symbols-outlined text-primary text-lg mr-2">location_on</span>
-                                            {t('location', 'Location')}
-                                        </h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('country', 'Country')}
-                                                </label>
-                                                <select
-                                                    name="country"
-                                                    value={formData.cities?.states?.statesPK.countryId || ''}
-                                                    onChange={handleSelectChange}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                                                >
-                                                    <option value="">-- {t('select-country', 'Select Country')} --</option>
-                                                    {countries.map(c => (
-                                                        <option key={c.countryId} value={c.countryId}>{c.countryName}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('state', 'State/Province')}
-                                                </label>
-                                                <select
-                                                    name="state"
-                                                    value={formData.cities?.states?.statesPK.stateId || ''}
-                                                    onChange={handleSelectChange}
-                                                    disabled={!formData.cities?.states?.statesPK.countryId}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:bg-gray-50 disabled:text-gray-400"
-                                                >
-                                                    <option value="">-- {t('select-state', 'Select State')} --</option>
-                                                    {states.map(s => (
-                                                        <option key={s.statesPK.stateId} value={s.statesPK.stateId}>{s.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('city', 'City')}
-                                                </label>
-                                                <select
-                                                    name="cities"
-                                                    value={formData.cities?.cityId || ''}
-                                                    onChange={handleSelectChange}
-                                                    disabled={!formData.cities?.states?.statesPK.stateId}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:bg-gray-50 disabled:text-gray-400"
-                                                >
-                                                    <option value="">-- {t('select-city', 'Select City')} --</option>
-                                                    {cities.map(c => (
-                                                        <option key={c.cityId} value={c.cityId}>{c.cityName}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                                    {t('timezone', 'Timezone')}
-                                                </label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">schedule</span>
-                                                    <input
-                                                        name="timezone"
-                                                        value={formData.timezone}
-                                                        onChange={handleInputChange}
-                                                        placeholder="America/Bogota"
-                                                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Footer - Fixed */}
-                            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 p-4 sm:p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowSedesModal(false);
-                                        setValidated(false);
-                                    }}
-                                    className="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                                >
-                                    <span className="flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-lg mr-2">close</span>
-                                        {t('cancel', 'Cancel')}
-                                    </span>
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-sm hover:shadow-md"
-                                >
-                                    <span className="flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-lg mr-2">
-                                            {formData.branchId ? 'save' : 'add'}
-                                        </span>
-                                        {formData.branchId ? t('save-changes', 'Save Changes') : t('create-branch', 'Create Branch')}
-                                    </span>
-                                </button>
-                            </div>
-                        </form>
+            <BottomSheetModal
+                isOpen={showSedesModal}
+                onClose={() => {
+                    setShowSedesModal(false);
+                    setValidated(false);
+                }}
+                title={formData.branchId ? `${t('edit', 'Edit')} ${t('branch', 'Branch')}` : `${t('add', 'Add')} ${t('branch', 'Branch')}`}
+                subtitle={formData.branchId ? `ID: #${formData.branchId}` : t('create-new-branch', 'Create a new branch')}
+                icon="store"
+                maxWidth="3xl"
+                footer={
+                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 p-4 sm:p-6">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setShowSedesModal(false);
+                                setValidated(false);
+                            }}
+                            className="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                        >
+                            <span className="flex items-center justify-center">
+                                <span className="material-symbols-outlined text-lg mr-2">close</span>
+                                {t('cancel', 'Cancel')}
+                            </span>
+                        </button>
+                        <button
+                            type="submit"
+                            form="branch-form"
+                            className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-sm hover:shadow-md"
+                        >
+                            <span className="flex items-center justify-center">
+                                <span className="material-symbols-outlined text-lg mr-2">
+                                    {formData.branchId ? 'save' : 'add'}
+                                </span>
+                                {formData.branchId ? t('save-changes', 'Save Changes') : t('create-branch', 'Create Branch')}
+                            </span>
+                        </button>
                     </div>
-                </div>
-            )}
+                }
+            >
+                <form id="branch-form" noValidate onSubmit={handleSubmit}>
+                    <div className="space-y-6">
+                        {/* Basic Information Section */}
+                        <div>
+                            <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+                                <span className="material-symbols-outlined text-primary text-lg mr-2">info</span>
+                                {t('basic-information', 'Basic Information')}
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('branch-name', 'Branch Name')} <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        name="branchName"
+                                        value={formData.branchName}
+                                        onChange={handleInputChange}
+                                        required
+                                        placeholder={t('enter-branch-name', 'Enter branch name')}
+                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
+                                            validated && !formData.branchName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
+                                    />
+                                    {validated && !formData.branchName && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center">
+                                            <span className="material-symbols-outlined text-sm mr-1">error</span>
+                                            {t('field-required', 'This field is required')}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('address', 'Address')}
+                                    </label>
+                                    <input
+                                        name="address"
+                                        value={formData.address}
+                                        onChange={handleInputChange}
+                                        placeholder={t('enter-address', 'Enter full address')}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('phone', 'Phone Number')}
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">phone</span>
+                                        <input
+                                            name="phoneNumbers"
+                                            value={formData.phoneNumbers}
+                                            onChange={handleInputChange}
+                                            placeholder="+1 234 567 8900"
+                                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('status', 'Status')}
+                                    </label>
+                                    <select
+                                        name="status"
+                                        value={formData.status || ''}
+                                        onChange={handleSelectChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                    >
+                                        <option value="">-- {t('select-status', 'Select Status')} --</option>
+                                        <option value="A">✓ {t('active', 'Active')}</option>
+                                        <option value="I">✕ {t('inactive', 'Inactive')}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Location Section */}
+                        <div>
+                            <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+                                <span className="material-symbols-outlined text-primary text-lg mr-2">location_on</span>
+                                {t('location', 'Location')}
+                            </h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('country', 'Country')}
+                                    </label>
+                                    <select
+                                        name="country"
+                                        value={formData.cities?.states?.statesPK.countryId || ''}
+                                        onChange={handleSelectChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                    >
+                                        <option value="">-- {t('select-country', 'Select Country')} --</option>
+                                        {countries.map(c => (
+                                            <option key={c.countryId} value={c.countryId}>{c.countryName}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('state', 'State/Province')}
+                                    </label>
+                                    <select
+                                        name="state"
+                                        value={formData.cities?.states?.statesPK.stateId || ''}
+                                        onChange={handleSelectChange}
+                                        disabled={!formData.cities?.states?.statesPK.countryId}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:bg-gray-50 disabled:text-gray-400"
+                                    >
+                                        <option value="">-- {t('select-state', 'Select State')} --</option>
+                                        {states.map(s => (
+                                            <option key={s.statesPK.stateId} value={s.statesPK.stateId}>{s.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('city', 'City')}
+                                    </label>
+                                    <select
+                                        name="cities"
+                                        value={formData.cities?.cityId || ''}
+                                        onChange={handleSelectChange}
+                                        disabled={!formData.cities?.states?.statesPK.stateId}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors disabled:bg-gray-50 disabled:text-gray-400"
+                                    >
+                                        <option value="">-- {t('select-city', 'Select City')} --</option>
+                                        {cities.map(c => (
+                                            <option key={c.cityId} value={c.cityId}>{c.cityName}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                        {t('timezone', 'Timezone')}
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">schedule</span>
+                                        <input
+                                            name="timezone"
+                                            value={formData.timezone}
+                                            onChange={handleInputChange}
+                                            placeholder="America/Bogota"
+                                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </BottomSheetModal>
         </div>
     );
 
