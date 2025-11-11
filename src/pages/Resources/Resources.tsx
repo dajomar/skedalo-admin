@@ -1,3 +1,4 @@
+import { FooterPagination } from "@/components/UI/FooterPagination";
 import { useAuthStore } from "@/store/authStore";
 import { useResourcesStore } from "@/store/resourcesStore";
 import { useServicesStore } from "@/store/servicesStore";
@@ -6,6 +7,9 @@ import type { Resources, ResourcesServices, ResourcesServicesDTO, Services } fro
 import { showAlertError, showAlertInfo, showAlertWarning } from "@/utils/sweetalert2";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { AddNewResource } from "./components/AddNewResource";
+import { AddServiceToResource } from "./components/AddServiceToResource";
+import { ScheduleResource } from "../SchedulesPages/ScheduleResource";
 
 
 export const ResourcesPage = () => {
@@ -41,14 +45,18 @@ export const ResourcesPage = () => {
     const [validated, setValidated] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+
 
     // Lista temporal de servicios para el recurso
     const [servicesTemp, setServicesTemp] = useState<Services[]>([]);
     // Modal para asignar servicios a un recurso
     const [showServicesModal, setShowServicesModal] = useState(false);
     const [resourceForServices, setResourceForServices] = useState<Resources | null>(null);
+
+    const [showScheduleModal, setShowSheduleModal] = useState<boolean>(false);
+    const [isEditing, setIsEditing] = useState<boolean>(false);  
+    const [selectScheduleResource, setSelectScheduleResource] = useState<Resources | null>(null); 
+    
 
     useMemo(() => {
         if (resources.length === 0) listResourcesByCompany(companyId);
@@ -57,15 +65,6 @@ export const ResourcesPage = () => {
         if (resourcesServices.length > 0) cleanResourcesServices();
         // eslint-disable-next-line
     }, [companyId]);
-
-    /*useEffect(() => {
-      // Cuando lleguen los servicios (solo los activos), todos se pondrán inactivos por defecto
-      const inactivos = services.filter(srv=> srv.status==="A").map((srv) => ({
-        ...srv,
-        status: "I",
-      }));
-      setServicesTemp(inactivos);
-    }, [services]);*/
 
     const handleInputChange = (
         e: React.ChangeEvent<
@@ -116,6 +115,12 @@ export const ResourcesPage = () => {
         setPreviewPhotoUrl(res.photoUrl || "");
         await listByBranchAndResource(res.branchId, res.resourceId || 0);
         setShowModal(true);
+    };
+
+    const handleSelectScheduleResource = (resource: Resources) => {
+        setSelectScheduleResource(resource);
+        setShowModal(false);
+        setIsEditing(false);
     };
 
     // Abrir modal independiente para gestionar servicios del recurso
@@ -333,17 +338,16 @@ export const ResourcesPage = () => {
         );
     }, [resources, searchTerm]);
 
-    const totalItems = filteredResources.length;
-    const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredResources.slice(indexOfFirstItem, indexOfLastItem);
+    // Información necesaria por paginación 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const handlePageChange = (page: number) => setCurrentPage(page);
-    const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setItemsPerPage(parseInt(e.target.value));
-        setCurrentPage(1);
-    };
+    const totalPages = Math.ceil(filteredResources.length / itemsPerPage);
+    const currentItems = filteredResources.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
 
 
 
@@ -375,312 +379,221 @@ export const ResourcesPage = () => {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {currentItems.map((r) => (
-                                <tr key={r.resourceId ?? Math.random()} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.resourceId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-900 flex items-center">
-                                        {r.photoUrl ? (
-                                            <img src={r.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-10 h-10 rounded-full mr-3 object-cover" />
-                                        ) : (
-                                            <span className="flex-shrink-0 text-4xl rounded-full bg-cover bg-center material-symbols-outlined dark:text-text-dark"> person </span>
-                                        )}
-                                        <div>
-                                            <div>{r.resourceName}</div>
-                                            <div className="text-xs text-gray-500">{r.description}</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sedes.find(s => s.branchId === r.branchId)?.branchName || '-'}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.resourceType}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.maxCapacity}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{r.status}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex items-center justify-end space-x-2">
-                                            <button onClick={() => handleSelectResource(r)} className="text-primary hover:text-primary/70" title={t('common.edit')}>
-                                                <span className="material-symbols-outlined text-base">edit</span>
-                                            </button>
-                                            <button onClick={() => handleOpenServicesModal(r)} className="text-primary hover:text-primary/70" title={t('resources.manageServices') || 'Manage services'}>
-                                                <span className="material-symbols-outlined text-base">assignment</span>
-                                            </button>
-                                        </div>
-                                    </td>
+                    {/* Desktop table view */}
+                    <div className="hidden md:block">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('resource', 'Resource')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('branch', 'Branch')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('type', 'Type')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('capacity', 'Capacity')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('status', 'Status')}</th>
+                                    <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {currentItems.map((r) => (
+                                    <tr key={r.resourceId ?? Math.random()} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">#{r.resourceId}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                {r.photoUrl ? (
+                                                    <img src={r.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-10 h-10 rounded-full mr-3 object-cover border-2 border-gray-200" />
+                                                ) : (
+                                                    <div className="w-10 h-10 rounded-full mr-3 bg-gray-100 flex items-center justify-center">
+                                                        <span className="material-symbols-outlined text-gray-400 text-xl">person</span>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900">{r.resourceName}</div>
+                                                    <div className="text-xs text-gray-500 truncate max-w-xs">{r.description}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            {sedes.find(s => s.branchId === r.branchId)?.branchName || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                r.resourceType === 'P' ? 'bg-blue-100 text-blue-800' : 
+                                                r.resourceType === 'L' ? 'bg-purple-100 text-purple-800' : 
+                                                'bg-gray-100 text-gray-800'
+                                            }`}>
+                                                {r.resourceType === 'P' ? t('person', 'Person') : r.resourceType === 'L' ? t('location', 'Location') : t('other', 'Other')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <span className="flex items-center">
+                                                <span className="material-symbols-outlined text-gray-400 text-base mr-1">groups</span>
+                                                {r.maxCapacity}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                r.status === 'A' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}>
+                                                {r.status === 'A' ? t('active', 'Active') : t('inactive', 'Inactive')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex items-center justify-end space-x-1">
+                                                <button onClick={() => handleSelectResource(r)} className="p-2 text-primary hover:bg-primary/10 rounded-md transition-colors" title={t('common.edit')}>
+                                                    <span className="material-symbols-outlined text-lg">edit</span>
+                                                </button>
+                                                <button onClick={() => handleOpenServicesModal(r)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors" title={t('resources.manageServices') || 'Manage services'}>
+                                                    <span className="material-symbols-outlined text-lg">assignment</span>
+                                                </button>
+                                                <button onClick={() => { handleSelectScheduleResource(r); setShowSheduleModal(true); }} className="p-2 text-purple-600 hover:bg-purple-50 rounded-md transition-colors" title={t('schedule', 'Schedule')}>
+                                                    <span className="material-symbols-outlined text-lg">schedule</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile card view */}
+                    <div className="md:hidden space-y-4">
+                        {currentItems.length === 0 && (
+                            <div className="text-center py-8 text-gray-500">
+                                <span className="material-symbols-outlined text-5xl mb-2">folder_off</span>
+                                <p>{t('no-resources-found', 'No resources found')}</p>
+                            </div>
+                        )}
+                        
+                        {currentItems.map((r) => (
+                            <div key={r.resourceId ?? Math.random()} className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center flex-1">
+                                        {r.photoUrl ? (
+                                            <img src={r.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-12 h-12 rounded-full mr-3 object-cover border-2 border-gray-200" />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full mr-3 bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                                <span className="material-symbols-outlined text-gray-400 text-2xl">person</span>
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-sm font-semibold text-gray-900 truncate">{r.resourceName}</h3>
+                                            <p className="text-xs text-gray-500 truncate">{r.description}</p>
+                                            <span className="text-xs text-gray-400">#{r.resourceId}</span>
+                                        </div>
+                                    </div>
+                                    <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                                        r.status === 'A' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                        {r.status === 'A' ? t('active', 'Active') : t('inactive', 'Inactive')}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('branch', 'Branch')}</p>
+                                        <p className="text-sm font-medium text-gray-900">{sedes.find(s => s.branchId === r.branchId)?.branchName || '-'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('type', 'Type')}</p>
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                            r.resourceType === 'P' ? 'bg-blue-100 text-blue-800' : 
+                                            r.resourceType === 'L' ? 'bg-purple-100 text-purple-800' : 
+                                            'bg-gray-100 text-gray-800'
+                                        }`}>
+                                            {r.resourceType === 'P' ? t('person', 'Person') : r.resourceType === 'L' ? t('location', 'Location') : t('other', 'Other')}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('capacity', 'Capacity')}</p>
+                                        <p className="text-sm font-medium text-gray-900 flex items-center">
+                                            <span className="material-symbols-outlined text-gray-400 text-base mr-1">groups</span>
+                                            {r.maxCapacity}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-3 border-t">
+                                    <button onClick={() => handleSelectResource(r)} className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-primary/10 text-primary rounded-md text-sm font-medium hover:bg-primary/20 transition-colors">
+                                        <span className="material-symbols-outlined text-base mr-1">edit</span>
+                                        {t('edit', 'Edit')}
+                                    </button>
+                                    <button onClick={() => handleOpenServicesModal(r)} className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100 transition-colors">
+                                        <span className="material-symbols-outlined text-base mr-1">assignment</span>
+                                        {t('services', 'Services')}
+                                    </button>
+                                    <button onClick={() => { handleSelectScheduleResource(r); setShowSheduleModal(true); }} className="flex items-center justify-center px-3 py-2 bg-purple-50 text-purple-600 rounded-md hover:bg-purple-100 transition-colors">
+                                        <span className="material-symbols-outlined text-lg">schedule</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-                        <select id="rows_per_page" value={itemsPerPage} onChange={handleItemsPerPageChange} className="border border-gray-300 rounded-md py-1 px-2 focus:ring-primary focus:border-primary">
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                        </select>
-                    </div>
-                    <div>
-                        {/* simple pagination controls (reusing Pagination component if available) */}
-                        {/* Importing Pagination at top would be ideal; but to avoid adding import here, show simple controls */}
-                        <div className="inline-flex items-center space-x-2">
-                            <button disabled={currentPage === 1} onClick={() => handlePageChange(Math.max(1, currentPage - 1))} className="px-3 py-1 bg-gray-100 rounded-md">Previous</button>
-                            <div className="px-3 py-1 bg-white border rounded-md">{currentPage} / {totalPages}</div>
-                            <button disabled={currentPage === totalPages} onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} className="px-3 py-1 bg-gray-100 rounded-md">Next</button>
-                        </div>
-                    </div>
-                </div>
+                <FooterPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    itemsPerPage={itemsPerPage}
+                    totalItems={resources.length}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={setItemsPerPage}
+                />
+
             </div>
 
             {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => setShowModal(false)} />
-                    <div className="relative w-full max-w-3xl mx-4 bg-white rounded-lg shadow-lg overflow-y-auto max-h-[90vh]">
-                        <div className="p-4 border-b">
-                            <h3 className="text-lg font-semibold">{formData.resourceId ? 'Edit Resource' : 'Add New Resource'}</h3>
-                        </div>
-                        <form className="p-6" noValidate onSubmit={handleSubmit}>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Resource name</label>
-                                    <input name="resourceName" value={formData.resourceName} onChange={handleInputChange} required className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary ${validated && !formData.resourceName ? 'border-red-500' : ''}`} />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Branch</label>
-                                    <select name="branchId" value={formData.branchId} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value={0}>-- Select branch --</option>
-                                        {sedes.map(s => <option key={s.branchId ?? 0} value={s.branchId ?? 0}>{s.branchName}</option>)}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Type</label>
-                                    <select name="resourceType" value={formData.resourceType} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="P">Person</option>
-                                        <option value="L">Location</option>
-                                        <option value="O">Other</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Max capacity</label>
-                                    <input name="maxCapacity" type="number" value={formData.maxCapacity} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div className="sm:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Description</label>
-                                    <textarea name="description" value={formData.description} onChange={handleInputChange} rows={3} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Phone</label>
-                                    <input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Email</label>
-                                    <input name="email" value={formData.email} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary" />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Photo</label>
-                                    <input type="file" accept="image/*" onChange={handlePhotoChange} className="mt-1 block w-full" />
-                                    {previewPhotoUrl && <img src={previewPhotoUrl} alt="preview" className="mt-2 w-24 h-24 object-cover rounded-md" />}
-                                </div>
-
-                                {/* Services assignment list - allow toggling which services are assigned to the resource */}
-                                {/* <div className="sm:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700">Services</label>
-                                    <div className="mt-2 border rounded-md p-2 max-h-48 overflow-auto">
-                                        {servicesTemp.length === 0 ? (
-                                            <div className="text-sm text-gray-500">No services available</div>
-                                        ) : (
-                                            <ul className="space-y-2">
-                                                {servicesTemp.map((srv) => (
-                                                    <li key={srv.serviceId} ref={itemRef} className="flex items-center justify-between">
-                                                        <label className="flex items-center space-x-3 cursor-pointer w-full">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={srv.status === 'A'}
-                                                                onChange={() => toggleActive(srv.serviceId!)}
-                                                                className="h-4 w-4 text-primary border-gray-300 rounded"
-                                                            />
-                                                            <div className="min-w-0">
-                                                                <div className="text-sm font-medium text-gray-900 truncate">{srv.serviceName}</div>
-                                                                <div className="text-xs text-gray-500 truncate">{srv.description}</div>
-                                                            </div>
-                                                            <div className="ml-2 text-xs text-gray-500">{srv.durationMinutes ? `${srv.durationMinutes} min` : ''}</div>
-                                                        </label>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                </div> */}
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">Status</label>
-                                    <select name="status" value={formData.status} onChange={handleInputChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary">
-                                        <option value="A">Active</option>
-                                        <option value="I">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 flex justify-end space-x-3">
-                                <button type="button" onClick={() => { setShowModal(false); }} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">Save</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <>
+                    <AddNewResource
+                        isOpen={showModal}
+                        onClose={() => setShowModal(false)}
+                        formData={formData}
+                        previewPhotoUrl={previewPhotoUrl}
+                        sedes={sedes}
+                        validated={validated}
+                        onHandleSubmit={handleSubmit}
+                        onHandleInputChange={handleInputChange}
+                        onHandlePhotoChange={handlePhotoChange}
+                    />
+                </>
             )}
+
+
             {/* Services modal independiente */}
             {showServicesModal && resourceForServices && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-  <div
-    className="absolute inset-0 bg-black/40"
-    onClick={handleCloseServicesModal}
-  />
-  <div className="relative w-full max-w-2xl mx-4 bg-white rounded-lg shadow-lg p-6">
-    {/* HEADER */}
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl shadow-sm">
-        <img
-          src={resourceForServices.photoUrl || '/placeholder.png'}
-          alt="photo"
-          className="w-14 h-14 rounded-full object-cover border border-gray-200"
-        />
-        <div>
-          <h3 className="text-lg font-bold text-gray-800 leading-tight">
-            {t('resources.assignServices')}
-          </h3>
-          <span className="text-sm text-gray-500">
-            {resourceForServices.resourceName}
-          </span>
-        </div>
-      </div>
-
-      <button
-        onClick={handleCloseServicesModal}
-        className="text-gray-500 hover:text-gray-700"
-      >
-        <span className="sr-only">Close</span>
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
-    </div>
-
-    {/* SERVICIOS SELECCIONADOS */}
-    {servicesTemp.some((srv) => srv.status === 'A') && (
-      <div className="mb-4">
-        <h4 className="text-sm font-medium text-gray-700 mb-2">
-          {t('resources.selectedServices') || 'Services sélectionnés'}
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {servicesTemp
-            .filter((srv) => srv.status === 'A')
-            .map((srv) => (
-              <div
-                key={srv.serviceId}
-                className="flex items-center gap-1 bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full"
-              >
-                <span>{srv.serviceName}</span>
-                <button
-                  onClick={() => toggleActive(srv.serviceId!)}
-                  className="text-primary/70 hover:text-primary"
-                >
-                  &times;
-                </button>
-              </div>
-            ))}
-        </div>
-      </div>
-    )}
-
-    {/* LISTA DE SERVICIOS */}
-    <div className="max-h-72 overflow-auto border rounded-md p-2">
-      {servicesTemp.length === 0 ? (
-        <div className="text-sm text-gray-500">
-          {t('resources.noServices') || 'No services available'}
-        </div>
-      ) : (
-        <ul className="space-y-2">
-          {servicesTemp.map((srv) => (
-            <li
-              key={srv.serviceId}
-              className="flex items-center justify-between"
-            >
-              <label className="flex items-center space-x-3 cursor-pointer w-full">
-                <input
-                  type="checkbox"
-                  checked={srv.status === 'A'}
-                  onChange={() => toggleActive(srv.serviceId!)}
-                  className="h-4 w-4 text-primary border-gray-300 rounded"
+                <AddServiceToResource
+                    isOpen={showServicesModal}
+                    onClose={handleCloseServicesModal}
+                    resourceForServices={resourceForServices}
+                    servicesTemp={servicesTemp}
+                    onToggleActive={toggleActive}
+                    onHandleSaveServices={handleSaveServices}
                 />
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-gray-900 truncate">
-                    {srv.serviceName}
-                  </div>
-                  <div className="text-xs text-gray-500 truncate">
-                    {srv.description}
-                  </div>
-                </div>
-                <div className="ml-2 text-xs text-gray-500">
-                  {srv.durationMinutes
-                    ? `${srv.durationMinutes} min`
-                    : ''}
-                </div>
-              </label>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-
-    {/* BOTONES */}
-    <div className="mt-4 flex justify-end space-x-3">
-      <button
-        onClick={handleCloseServicesModal}
-        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
-      >
-        {t('common.cancel')}
-      </button>
-      <button
-        onClick={handleSaveServices}
-        className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-      >
-        {t('common.save')}
-      </button>
-    </div>
-  </div>
-</div>
-
             )}
+
+            {/* Service modal de horario */}
+            {showScheduleModal && selectScheduleResource && (
+                <>
+                {/* <ScheduleResourceModal resource={ selectedResource } editableSchedules={editableSchedules} 
+                                                          isEditing={isEditing} 
+                                                          daysOfWeek={daysOfWeek} 
+                                                          onShowModal={(isVisible)=>{setShowModal(isVisible)}} 
+                                                          onIsEditing={(isEditing) => {setIsEditing(isEditing)}} 
+                                                          onHandleChange={(i,day,value) => handleChange(i, 'dayOfWeek', Number(value))} 
+                                                          onHandleAddRow={handleAddRow} 
+                                                          onHandleDeleteRow={(rowId) => handleDeleteRow(rowId)} 
+                                                          onHandleSave={handleSave} 
+                                                          onHandleCancel={handleCancel} 
+                                                          /> */}
+                
+                <ScheduleResource resourceSelected={selectScheduleResource}
+                                      showModalSchedule={ (isVisible) => {setShowSheduleModal(isVisible)} }  
+                /> 
+
+
+                </>
+            ) }
         </div>
     );
 }

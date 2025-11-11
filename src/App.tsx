@@ -13,7 +13,7 @@ const ServicesCompany = lazy(() => import("./pages/ServicesCompany/Services"));
 const Branches = lazy(() => import("./pages/Branches/Branches"));
 const ResourcesPage = lazy(() => import("./pages/Resources/Resources"));
 const ServiceCategoriesPage = lazy(() => import("./pages/ServiceCategories/ServicesCategories"));
-const  ScheduleResource = lazy(() => import("./pages/SchedulesPages/ScheduleResource"));
+
 const  UserProfile = lazy(() => import("./pages/UserProfile/UserProfile"));
 const  DayViewCalendar = lazy(() => import("./pages/Appointments/Appointments"));
 const  AppointmentsDetails = lazy(() => import("./pages/Appointments/components/Details"));
@@ -60,7 +60,6 @@ const App = () => {
                 <Route path="/resources" element={<ResourcesPage />} />
                 <Route path="/services" element={<ServicesCompany />} />
                 <Route path="/service-categories" element={<ServiceCategoriesPage />} />
-                <Route path="/schedules" element={<ScheduleResource />} />
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/appointments" element={<DayViewCalendar />} />
                 <Route path="/details/branch/:branchId/appointment/:appointmentId" element={<AppointmentsDetails />} />

@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 import api from "@/api/api/axios";
 import type { UserLogin } from "@/types";
 import { changePassword, postLogin } from "@/services/LoginServices";
+import { removeFromLocalStorage } from "@/helpers/localStorage";
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -95,6 +96,9 @@ export const useAuthStore = create<AuthState>()(
         sessionStorage.removeItem("tokenBookify");
         sessionStorage.removeItem("refreshTokenBookify");
         sessionStorage.removeItem("tokenExp");
+
+        removeFromLocalStorage("auth-storage");
+        
         api.defaults.headers.common["Authorization"] = "";
       },
 
@@ -102,7 +106,8 @@ export const useAuthStore = create<AuthState>()(
         set({ companyName });
       }
     }), {
-      name: 'auth-storage'
+      name: 'auth-storage',
+      
     }
   )
 );

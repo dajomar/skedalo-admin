@@ -7,10 +7,12 @@ import { showAlertError, showAlertInfo, confirmCanceling } from "@/utils/sweetal
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Pagination from "@/components/UI/Pagination";
+import { FooterPagination } from "@/components/UI/FooterPagination";
+import { ScheduleResourceModal } from "../Resources/components/ScheduleResourceModal";
 
 
 
-export const ScheduleResource = () => {
+export const ScheduleResource = ( {resourceSelected,showModalSchedule, }:{resourceSelected:Resources | null; showModalSchedule:(isVisible:boolean) => void} ) => {
 
     const { t } = useTranslation();
     const { schedules, setSelectedResourceId, listByResource, saveList } = useSchedulesStore();
@@ -19,13 +21,17 @@ export const ScheduleResource = () => {
     const { companyId } = useAuthStore();
 
     const [showModal, setShowModal] = useState(false);
-    const [selectedResource, setSelectedResource] = useState<Resources | null>(null);
+    const [selectedResource, setSelectedResource] = useState<Resources | null>(resourceSelected);
     const [selectedSede, setSelectedSede] = useState<Branches | null>(null);
     const [editableSchedules, setEditableSchedules] = useState<Schedules[]>([]);
     const [isEditing, setIsEditing] = useState(false);
-    // pagination for resources list
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    useEffect(()=>{
+
+        
+
+    },[showModal])
+
     // search filter
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -62,13 +68,7 @@ export const ScheduleResource = () => {
         );
     }, [resources, searchTerm]);
 
-    // Resources pagination
-    const totalResources = filteredResources.length;
-    const totalPagesResources = Math.max(1, Math.ceil(totalResources / itemsPerPage));
-    const currentResources = useMemo(() => {
-        const start = (currentPage - 1) * itemsPerPage;
-        return filteredResources.slice(start, start + itemsPerPage);
-    }, [filteredResources, currentPage, itemsPerPage]);
+
 
 
     useEffect(() => {
@@ -123,6 +123,7 @@ export const ScheduleResource = () => {
             )
         );
         setIsEditing(true);
+        
     };
 
     const handleDeleteRow = async (idx: number) => {
@@ -162,6 +163,7 @@ export const ScheduleResource = () => {
 
         if (resp && resp.messageId === "TR000") {
             showAlertInfo(resp.messageText);
+            showModalSchedule( false );
             // setFormData(initialResource);
             // setServicesTemp([]);
             // cleanResourcesServices();      
@@ -178,219 +180,28 @@ export const ScheduleResource = () => {
         setIsEditing(false);
     };
 
+
     return (
-        <div className="p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">{t('schedule-resource', 'Schedule Resource')}</h2>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex flex-col sm:flex-row items-center justify-between mb-6 space-y-4 sm:space-y-0">
-                    <div className="relative w-full sm:w-1/2 md:w-1/3">
-                        <input
-                            type="text"
-                            className="w-full border border-gray-300 rounded-md py-2 px-3 text-sm"
-                            placeholder={t('search-resource', 'Buscar recurso por nombre o descripción')}
-                            value={searchTerm}
-                            onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                        />
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg border border-gray-300 hover:bg-gray-200">
-                            <span className="material-symbols-outlined text-base mr-2">filter_list</span>
-                            Filters
-                        </button>
-                    </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resource</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {currentResources.map((res, idx) => (
-                                <tr key={res.resourceId} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap w-12">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-900 flex items-center">
-
-                                        {res.photoUrl ? (
-                                            <img src={res.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-10 h-10 rounded-full mr-3 object-cover" />
-                                        ) : (
-                                            <span className="flex-shrink-0 text-4xl rounded-full bg-cover bg-center material-symbols-outlined dark:text-text-dark"> person </span>
-                                        )}
-                                        <div>
-                                            <div>{res.resourceName}</div>
-                                            <div className="text-xs text-gray-500">{res.description}</div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sedes.find(s => s.branchId === res.branchId)?.branchName || ''}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{res.status || ''}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        {/* <button
-                                            onClick={() => { handleSelectResource(res); setShowModal(true); }}
-                                            className="inline-flex items-center px-3 py-1 bg-primary text-white rounded hover:bg-primary/90 mr-2">
-                                            <span className="material-symbols-outlined mr-2">schedule</span>
-                                            {t('modify-schedule', 'Modificar horario')}
-                                        </button> */}
-                                        <div className="flex items-center justify-end space-x-2">
-                                            <button onClick={() => { handleSelectResource(res); setShowModal(true); }} className="text-primary hover:text-primary/70" title={t('common.edit')}>
-                                                <span className="text-4xl material-symbols-outlined text-base">schedule</span>
-                                            </button>
-                                            
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="mt-4 flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                        <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-                        <select id="rows_per_page" value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }} className="border border-gray-300 rounded-md py-1 px-2">
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                        </select>
-                    </div>
-                    <Pagination currentPage={currentPage} totalPages={totalPagesResources} onPageChange={(p) => setCurrentPage(p)} totalItems={totalResources} itemsPerPage={itemsPerPage} />
-                </div>
-            </div>
-
+        <>
             {/* Modal: Edit schedules for selected resource */}
-            {showModal && selectedResource && (
-                <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4">
-                    <div className="absolute inset-0 bg-black/40" onClick={() => { setShowModal(false); setIsEditing(false); }} />
-                    <div className="relative w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg z-10 p-6 overflow-hidden">
+            {  selectedResource && (
 
-                        {/* header */}
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-4 p-3  rounded-xl shadow-sm">
-                                {/* <img
-                                    src={selectedResource.photoUrl || '/placeholder.png'}
-                                    alt="photo"
-                                    className="w-14 h-14 rounded-full object-cover border border-gray-200"
-                                /> */}
+                <>
+                    <ScheduleResourceModal resource={ selectedResource } editableSchedules={editableSchedules} 
+                                          isEditing={isEditing} 
+                                          daysOfWeek={daysOfWeek} 
+                                          onShowModal={(isVisible)=>{showModalSchedule(isVisible)}} 
+                                          onIsEditing={(isEditing) => {setIsEditing(isEditing)}} 
+                                          onHandleChange={(i,field,value) => handleChange(i, field, value)} 
+                                          onHandleAddRow={handleAddRow} 
+                                          onHandleDeleteRow={(rowId) => handleDeleteRow(rowId)} 
+                                          onHandleSave={handleSave} 
+                                          onHandleCancel={handleCancel} 
+                                          />
+                </>
 
-                                {selectedResource.photoUrl ? (
-                                    <img src={selectedResource.photoUrl || '../../assets/placeholder.png'} alt="photo" className="w-14 h-14 rounded-full object-cover border border-gray-200" />
-                                ) : (
-                                    <span className="flex-shrink-0 text-4xl rounded-full bg-cover bg-center material-symbols-outlined dark:text-text-dark"> person </span>
-                                )}
-
-
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-800 leading-tight">
-                                        {selectedResource.resourceName}
-                                    </h3>
-                                    <span className="text-sm text-gray-500">
-                                        {selectedResource.description}
-                                    </span>
-                                </div>
-
-
-                            </div>
-
-                            <div className="p-4  flex items-center justify-between">
-
-
-                                <div className="flex items-center gap-2">
-                                    <button onClick={handleAddRow} className="px-3 py-1 bg-gray-100 rounded">{t('add-row', 'Add Row')}</button>
-                                    <button onClick={handleSave} className={`px-4 py-2 rounded text-white ${isEditing ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 text-gray-600 cursor-not-allowed'}`} disabled={!isEditing}>{t('save', 'Save')}</button>
-                                </div>
-                            </div>
-
-                            {/* <button
-                                onClick={() => { handleCancel(); setShowModal(false); }}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                <span className="sr-only">Close</span>
-                                <svg
-                                    className="h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button> */}
-                        </div>
-
-
-
-
-
-                        <div className="p-4">
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-4 py-2 text-left text-xs text-gray-500">{t('day', 'Day')}</th>
-                                            <th className="px-4 py-2 text-left text-xs text-gray-500">{t('start', 'Start')}</th>
-                                            <th className="px-4 py-2 text-left text-xs text-gray-500">{t('end', 'End')}</th>
-                                            <th className="px-4 py-2 text-left text-xs text-gray-500">{t('status', 'Status')}</th>
-                                            <th className="px-4 py-2 text-left text-xs text-gray-500">{t('actions', 'Actions')}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {editableSchedules.map((row, i) => (
-                                            <tr key={i} className="hover:bg-gray-50">
-                                                <td className="px-4 py-2">
-                                                    <select value={row.dayOfWeek} onChange={(e) => handleChange(i, 'dayOfWeek', Number(e.target.value))} className="rounded border-gray-300 px-2 py-1">
-                                                        {daysOfWeek.map((d, di) => (
-                                                            <option key={di} value={di + 1}>{d}</option>
-                                                        ))}
-                                                    </select>
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    <input type="time" value={row.startTime?.slice(0, 5) || ''} onChange={(e) => handleChange(i, 'startTime', e.target.value)} className="rounded border-gray-300 px-2 py-1" />
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    <input type="time" value={row.endTime?.slice(0, 5) || ''} onChange={(e) => handleChange(i, 'endTime', e.target.value)} className="rounded border-gray-300 px-2 py-1" />
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    <select value={row.status} onChange={(e) => handleChange(i, 'status', e.target.value)} className="rounded border-gray-300 px-2 py-1">
-                                                        <option value="A">Active</option>
-                                                        <option value="I">Inactive</option>
-                                                    </select>
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    <button onClick={() => handleDeleteRow(i)} className="px-3 py-1 bg-red-100 text-red-600 rounded">
-                                                        
-                                                        <span className="material-symbols-outlined "> delete </span>
-                                                        </button>
-                                                    
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {editableSchedules.length === 0 && (
-                                            <tr>
-                                                <td colSpan={5} className="px-4 py-6 text-center text-gray-500">{t('no-schedules', 'No schedules defined')}</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div className="p-4 border-t flex justify-end gap-2">
-                            <button onClick={() => { handleCancel(); setShowModal(false); }} className="px-4 py-2 bg-gray-200 rounded">{t('cancel', 'Cancel')}</button>
-                            <button onClick={handleSave} className={`px-4 py-2 rounded text-white ${isEditing ? 'bg-primary hover:bg-primary/90' : 'bg-gray-300 text-gray-600'}`} disabled={!isEditing}>{t('save', 'Save')}</button>
-                        </div>
-                    </div>
-                </div>
             )}
-        </div>
+        </>
     );
 };
 

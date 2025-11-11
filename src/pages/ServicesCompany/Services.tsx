@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Pagination from "@/components/UI/Pagination";
 import AddService from "@/components/UI/AddService";
+import { FooterPagination } from "@/components/UI/FooterPagination";
 
 const ServicesCompany = () => {
 
@@ -33,8 +34,7 @@ const ServicesCompany = () => {
     const [formData, setFormData] = useState<Services>(initialService);
     const [validated, setValidated] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
+    
     const [searchTerm, setSearchTerm] = useState("");
 
     useMemo(() => {
@@ -101,26 +101,36 @@ const ServicesCompany = () => {
     }, [services, serviceCategories, searchTerm]);
 
     // Calculate pagination
-    const totalItems = filteredServices.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
+    // const totalItems = filteredServices.length;
+    // const totalPages = Math.ceil(totalItems / itemsPerPage);
+    // const indexOfLastItem = currentPage * itemsPerPage;
+    // const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    // const currentItems = filteredServices.slice(indexOfFirstItem, indexOfLastItem);
 
-    const handlePageChange = (pageNumber: number) => {
-        setCurrentPage(pageNumber);
-    };
+    // const handlePageChange = (pageNumber: number) => {
+    //     setCurrentPage(pageNumber);
+    // };
 
-    const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newItemsPerPage = parseInt(e.target.value);
-        setItemsPerPage(newItemsPerPage);
-        setCurrentPage(1); // Reset to first page when changing items per page
-    };
+    // const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     const newItemsPerPage = parseInt(e.target.value);
+    //     setItemsPerPage(newItemsPerPage);
+    //     setCurrentPage(1); // Reset to first page when changing items per page
+    // };
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
         setCurrentPage(1); // Reset to first page when searching
     };
+
+      // Información necesaria por paginación 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
+    const currentItems = filteredServices.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return <>
         <div className="flex-1 p-6 overflow-y-auto">
@@ -151,126 +161,166 @@ const ServicesCompany = () => {
                     </div>
                 </div>
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12"
-                                    scope="col">
-                                    <input className="rounded border-gray-300 text-primary focus:ring-primary"
-                                        type="checkbox" />
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    scope="col">
-                                    Service Name
-                                    <button className="ml-1 text-gray-400 hover:text-gray-600"><span
-                                        className="material-symbols-outlined text-sm">arrow_upward</span></button>
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    scope="col">
-                                    Category
-                                    <button className="ml-1 text-gray-400 hover:text-gray-600"><span
-                                        className="material-symbols-outlined text-sm">arrow_upward</span></button>
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    scope="col">
-                                    Price
-                                    <button className="ml-1 text-gray-400 hover:text-gray-600"><span
-                                        className="material-symbols-outlined text-sm">arrow_upward</span></button>
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    scope="col">
-                                    Duration
-                                    <button className="ml-1 text-gray-400 hover:text-gray-600"><span
-                                        className="material-symbols-outlined text-sm">arrow_upward</span></button>
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    scope="col">
-                                    Availability
-                                    <button className="ml-1 text-gray-400 hover:text-gray-600"><span
-                                        className="material-symbols-outlined text-sm">arrow_upward</span></button>
-                                </th>
-                                <th className="relative px-6 py-3" scope="col">
-                                    <span className="sr-only">Edit</span>
-                                </th>
-                            </tr>
-                        </thead>
+                    {/* Desktop table view */}
+                    <div className="hidden md:block">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        scope="col">
+                                        {t('service-name', 'Service Name')}
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        scope="col">
+                                        {t('category', 'Category')}
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        scope="col">
+                                        {t('price', 'Price')}
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        scope="col">
+                                        {t('duration', 'Duration')}
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        scope="col">
+                                        {t('status', 'Status')}
+                                    </th>
+                                    <th className="relative px-6 py-3" scope="col">
+                                        <span className="sr-only">Actions</span>
+                                    </th>
+                                </tr>
+                            </thead>
 
-
-                        <tbody className="bg-white divide-y divide-gray-200">
-
-                            <>
-                            
-                            
+                            <tbody className="bg-white divide-y divide-gray-200">
                                 {currentItems.map((serv) => (
-                                    
-                                    <tr key={serv.serviceId} className="hover:bg-gray-50" >
-                                        
-                                        <td className="px-6 py-4 whitespace-nowrap w-12">
-                                            <input className="rounded border-gray-300 text-primary focus:ring-primary"
-                                                type="checkbox" />
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-900">
-                                            {serv.serviceName}
-                                        </td>   
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {serviceCategories.find(cat => cat.categoryId === serv.categoryId)?.name || 'Uncategorized'} 
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {serv.currency} ${(serv.price.toFixed(2).toString())}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {serv.durationMinutes} min
+                                    <tr key={serv.serviceId} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                {serv.icon && (
+                                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                                                        <span className="material-symbols-outlined text-primary text-xl">{serv.icon}</span>
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <div className="text-sm font-medium text-gray-900">{serv.serviceName}</div>
+                                                    <div className="text-xs text-gray-500 truncate max-w-xs">{serv.description}</div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            {serv.status === 'A' ? 'Available' : serv.status === 'L' ? 'Limited' : 'Unavailable'}
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                {serviceCategories.find(cat => cat.categoryId === serv.categoryId)?.name || t('uncategorized', 'Uncategorized')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                            {serv.currency} ${serv.price.toFixed(2)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <span className="flex items-center">
+                                                <span className="material-symbols-outlined text-gray-400 text-base mr-1">schedule</span>
+                                                {serv.durationMinutes} {t('min', 'min')}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                serv.status === 'A' ? 'bg-green-100 text-green-800' : 
+                                                serv.status === 'L' ? 'bg-yellow-100 text-yellow-800' : 
+                                                'bg-red-100 text-red-800'
+                                            }`}>
+                                                {serv.status === 'A' ? t('available', 'Available') : serv.status === 'L' ? t('limited', 'Limited') : t('unavailable', 'Unavailable')}
+                                            </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button className="text-primary hover:text-primary/70 mr-2" onClick={() => handleSelectService(serv)}><span
-                                                className="material-symbols-outlined text-base">edit</span></button>
-                                            <button className="text-red-600 hover:text-red-900"><span       
-                                            className="material-symbols-outlined text-base">delete</span></button>
+                                            <div className="flex items-center justify-end space-x-1">
+                                                <button onClick={() => handleSelectService(serv)} className="p-2 text-primary hover:bg-primary/10 rounded-md transition-colors" title={t('edit', 'Edit')}>
+                                                    <span className="material-symbols-outlined text-lg">edit</span>
+                                                </button>
+                                                <button className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors" title={t('delete', 'Delete')}>
+                                                    <span className="material-symbols-outlined text-lg">delete</span>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                    
-                                    
-                                    
-                                ))} 
-                            </>
-                            
-                        </tbody>
-                    </table>
-                </div>
-                <div className="mt-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="text-sm text-gray-600">
-                            <label className="mr-2" htmlFor="rows_per_page">Rows per page:</label>
-                            <select
-                                className="border border-gray-300 rounded-md py-1 px-2 focus:ring-primary focus:border-primary"
-                                id="rows_per_page"
-                                value={itemsPerPage}
-                                onChange={handleItemsPerPageChange}>
-                                <option value={10}>10</option>
-                                <option value={25}>25</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                    <Pagination
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPageChange={handlePageChange}
-                        totalItems={totalItems}
-                        itemsPerPage={itemsPerPage}
-                    />
+
+                    {/* Mobile card view */}
+                    <div className="md:hidden space-y-4">
+                        {currentItems.length === 0 && (
+                            <div className="text-center py-8 text-gray-500">
+                                <span className="material-symbols-outlined text-5xl mb-2">search_off</span>
+                                <p>{t('no-services-found', 'No services found')}</p>
+                            </div>
+                        )}
+                        
+                        {currentItems.map((serv) => (
+                            <div key={serv.serviceId} className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center flex-1">
+                                        {serv.icon && (
+                                            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                                                <span className="material-symbols-outlined text-primary text-2xl">{serv.icon}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-sm font-semibold text-gray-900 truncate">{serv.serviceName}</h3>
+                                            <p className="text-xs text-gray-500 truncate">{serv.description}</p>
+                                        </div>
+                                    </div>
+                                    <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+                                        serv.status === 'A' ? 'bg-green-100 text-green-800' : 
+                                        serv.status === 'L' ? 'bg-yellow-100 text-yellow-800' : 
+                                        'bg-red-100 text-red-800'
+                                    }`}>
+                                        {serv.status === 'A' ? t('available', 'Available') : serv.status === 'L' ? t('limited', 'Limited') : t('unavailable', 'Unavailable')}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('category', 'Category')}</p>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                            {serviceCategories.find(cat => cat.categoryId === serv.categoryId)?.name || t('uncategorized', 'Uncategorized')}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('price', 'Price')}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{serv.currency} ${serv.price.toFixed(2)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('duration', 'Duration')}</p>
+                                        <p className="text-sm font-medium text-gray-900 flex items-center">
+                                            <span className="material-symbols-outlined text-gray-400 text-base mr-1">schedule</span>
+                                            {serv.durationMinutes} {t('min', 'min')}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-3 border-t">
+                                    <button onClick={() => handleSelectService(serv)} className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-primary/10 text-primary rounded-md text-sm font-medium hover:bg-primary/20 transition-colors">
+                                        <span className="material-symbols-outlined text-base mr-1">edit</span>
+                                        {t('edit', 'Edit')}
+                                    </button>
+                                    <button className="flex items-center justify-center px-3 py-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100 transition-colors">
+                                        <span className="material-symbols-outlined text-lg">delete</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div className="mt-6 flex justify-end space-x-3">
-                    <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                        Cancel
-                    </button>
-                    <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
-                        Save Changes
-                    </button>
-                </div>
+               
+               <FooterPagination
+                                   currentPage={currentPage}
+                                   totalPages={totalPages}
+                                   itemsPerPage={itemsPerPage}
+                                   totalItems={services.length}
+                                   onPageChange={setCurrentPage}
+                                   onItemsPerPageChange={setItemsPerPage}
+                               />
             </div>
         </div>
         

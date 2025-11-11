@@ -4,6 +4,8 @@ import { useServicesStore } from "@/store/servicesStore";
 import { useServiceCategoriesStore } from "@/store/serviceCategoriesStore";
 import type { Services } from "@/types";
 import { showAlertError, showAlertInfo } from "@/utils/sweetalert2";
+import BottomSheetModal from "./BottomSheetModal";
+import { useTranslation } from "react-i18next";
 
 interface AddServiceProps {
   isOpen: boolean;
@@ -12,6 +14,7 @@ interface AddServiceProps {
 }
 
 export default function AddService({ isOpen, onClose, initialService }: AddServiceProps) {
+  const { t } = useTranslation();
   const { companyId, userId, defaultCurrency } = useAuthStore();
   const { saveService, listServicesByCompany } = useServicesStore();
   const { serviceCategories, listCategoryServiceByCompany } = useServiceCategoriesStore();
@@ -92,123 +95,219 @@ export default function AddService({ isOpen, onClose, initialService }: AddServi
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-2xl mx-4 bg-white rounded-lg shadow-lg">
-        <div className="p-4 border-b">
-          <h3 className="text-lg font-semibold">{form.serviceId ? "Edit Service" : "Add New Service"}</h3>
+    <BottomSheetModal
+      isOpen={isOpen}
+      onClose={() => {
+        onClose();
+        setValidated(false);
+      }}
+      title={form.serviceId ? t('edit-service', 'Edit Service') : t('add-service', 'Add New Service')}
+      subtitle={form.serviceId ? `ID: #${form.serviceId}` : t('create-new-service', 'Create a new service')}
+      icon={form.icon || 'room_service'}
+      maxWidth="2xl"
+      footer={
+        <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 p-4 sm:p-6">
+          <button
+            type="button"
+            onClick={() => {
+              onClose();
+              setValidated(false);
+            }}
+            className="px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          >
+            <span className="flex items-center justify-center">
+              <span className="material-symbols-outlined text-lg mr-2">close</span>
+              {t('cancel', 'Cancel')}
+            </span>
+          </button>
+          <button
+            type="submit"
+            form="service-form"
+            className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-sm hover:shadow-md"
+          >
+            <span className="flex items-center justify-center">
+              <span className="material-symbols-outlined text-lg mr-2">
+                {form.serviceId ? 'save' : 'add'}
+              </span>
+              {form.serviceId ? t('update', 'Update') : t('create', 'Create')}
+            </span>
+          </button>
         </div>
-        <form className="p-6" noValidate onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Service name</label>
-              <input
-                name="serviceName"
-                value={form.serviceName}
-                onChange={handleChange}
-                required
-                className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary ${validated && !form.serviceName ? 'border-red-500' : ''}`}
-                placeholder="Service name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Category</label>
-              <select
-                name="categoryId"
-                value={form.categoryId}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
-              >
-                <option value={0}>Uncategorized</option>
-                {serviceCategories.map((cat, idx) => (
-                  <option key={cat.categoryId ?? idx} value={cat.categoryId ?? 0}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Price</label>
-              <div className="mt-1 flex">
+      }
+    >
+      <form id="service-form" noValidate onSubmit={handleSubmit}>
+        <div className="space-y-6">
+          {/* Basic Information Section */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+              <span className="material-symbols-outlined text-primary text-lg mr-2">info</span>
+              {t('basic-information', 'Basic Information')}
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('service-name', 'Service Name')} <span className="text-red-500">*</span>
+                </label>
                 <input
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  min={0}
-                  value={form.price}
+                  name="serviceName"
+                  value={form.serviceName}
                   onChange={handleChange}
                   required
-                  className={`block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary ${validated && form.price < 0 ? 'border-red-500' : ''}`}
+                  placeholder={t('enter-service-name', 'Enter service name')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
+                    validated && !form.serviceName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  }`}
                 />
-                <select
-                  name="currency"
-                  value={form.currency}
+                {validated && !form.serviceName && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                    <span className="material-symbols-outlined text-sm mr-1">error</span>
+                    {t('field-required', 'This field is required')}
+                  </p>
+                )}
+              </div>
+
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('description', 'Description')}
+                </label>
+                <textarea
+                  name="description"
+                  value={form.description}
                   onChange={handleChange}
-                  className="ml-2 rounded-md border-gray-300"
+                  rows={3}
+                  placeholder={t('enter-description', 'Enter service description')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('category', 'Category')}
+                </label>
+                <select
+                  name="categoryId"
+                  value={form.categoryId}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                 >
-                  <option value={defaultCurrency}>{defaultCurrency}</option>
+                  <option value={0}>{t('uncategorized', 'Uncategorized')}</option>
+                  {serviceCategories.map((cat, idx) => (
+                    <option key={cat.categoryId ?? idx} value={cat.categoryId ?? 0}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('status', 'Status')}
+                </label>
+                <select
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                >
+                  <option value="A">✓ {t('available', 'Available')}</option>
+                  <option value="L">⚠ {t('limited', 'Limited')}</option>
+                  <option value="U">✕ {t('unavailable', 'Unavailable')}</option>
                 </select>
               </div>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Duration (minutes)</label>
-              <input
-                name="durationMinutes"
-                type="number"
-                min={1}
-                value={form.durationMinutes}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
+          {/* Pricing & Duration Section */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+              <span className="material-symbols-outlined text-primary text-lg mr-2">payments</span>
+              {t('pricing-duration', 'Pricing & Duration')}
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('price', 'Price')} <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">$</span>
+                    <input
+                      name="price"
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={form.price}
+                      onChange={handleChange}
+                      required
+                      placeholder="0.00"
+                      className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
+                        validated && form.price < 0 ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      }`}
+                    />
+                  </div>
+                  <select
+                    name="currency"
+                    value={form.currency}
+                    onChange={handleChange}
+                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  >
+                    <option value={defaultCurrency}>{defaultCurrency}</option>
+                  </select>
+                </div>
+              </div>
 
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Status</label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
-              >
-                <option value="A">Available</option>
-                <option value="L">Limited</option>
-                <option value="U">Unavailable</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Icon (URL)</label>
-              <input
-                name="icon"
-                value={form.icon || ''}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-primary focus:border-primary"
-                placeholder="Icon URL"
-              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('duration', 'Duration (minutes)')}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">schedule</span>
+                  <input
+                    name="durationMinutes"
+                    type="number"
+                    min={1}
+                    value={form.durationMinutes}
+                    onChange={handleChange}
+                    placeholder="30"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end space-x-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Cancel</button>
-            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">{form.serviceId ? 'Update' : 'Create'}</button>
+          {/* Appearance Section */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+              <span className="material-symbols-outlined text-primary text-lg mr-2">palette</span>
+              {t('appearance', 'Appearance')}
+            </h4>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('icon', 'Icon')} <span className="text-xs text-gray-500">({t('material-symbols', 'Material Symbols')})</span>
+                </label>
+                <div className="flex gap-3">
+                  <input
+                    name="icon"
+                    value={form.icon || ''}
+                    onChange={handleChange}
+                    placeholder="room_service"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                  />
+                  {form.icon && (
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="material-symbols-outlined text-primary text-2xl">{form.icon}</span>
+                    </div>
+                  )}
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {t('icon-hint', 'Browse icons at')} <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">fonts.google.com/icons</a>
+                </p>
+              </div>
+            </div>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </form>
+    </BottomSheetModal>
   );
 }
