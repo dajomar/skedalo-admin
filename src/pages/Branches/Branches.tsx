@@ -283,34 +283,113 @@ const Branches = () => {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">#</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
-                                <th className="relative px-6 py-3"><span className="sr-only">Edit</span></th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {currentItems.map((b) => (
-                                <tr key={b.branchId ?? Math.random()} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{b.branchId}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-900">{b.branchName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{b.address}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{b.phoneNumbers}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{b.cities.cityName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button onClick={() => { setFormData(b); setShowSedesModal(true); }} className="text-primary hover:text-primary/70 mr-2">
-                                            <span className="material-symbols-outlined text-base">edit</span>
-                                        </button>
-                                    </td>
+                    {/* Desktop table view */}
+                    <div className="hidden md:block">
+                        <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('branch-name', 'Branch Name')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('address', 'Address')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('phone', 'Phone')}</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('city', 'City')}</th>
+                                    <th className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {currentItems.map((b) => (
+                                    <tr key={b.branchId ?? Math.random()} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-500">#{b.branchId}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                                                    <span className="material-symbols-outlined text-primary text-xl">store</span>
+                                                </div>
+                                                <div className="text-sm font-medium text-gray-900">{b.branchName}</div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm text-gray-700 max-w-xs truncate">{b.address}</div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                            <span className="flex items-center">
+                                                <span className="material-symbols-outlined text-gray-400 text-base mr-1">phone</span>
+                                                {b.phoneNumbers}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <span className="material-symbols-outlined text-xs mr-1">location_on</span>
+                                                {b.cities.cityName}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button onClick={() => { setFormData(b); setShowSedesModal(true); }} className="p-2 text-primary hover:bg-primary/10 rounded-md transition-colors" title={t('edit', 'Edit')}>
+                                                <span className="material-symbols-outlined text-lg">edit</span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Mobile card view */}
+                    <div className="md:hidden space-y-4">
+                        {currentItems.length === 0 && (
+                            <div className="text-center py-8 text-gray-500">
+                                <span className="material-symbols-outlined text-5xl mb-2">store_off</span>
+                                <p>{t('no-branches-found', 'No branches found')}</p>
+                            </div>
+                        )}
+                        
+                        {currentItems.map((b) => (
+                            <div key={b.branchId ?? Math.random()} className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center flex-1">
+                                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                                            <span className="material-symbols-outlined text-primary text-2xl">store</span>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-sm font-semibold text-gray-900 truncate">{b.branchName}</h3>
+                                            <p className="text-xs text-gray-400">#{b.branchId}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 mb-3">
+                                    <div>
+                                        <p className="text-xs text-gray-500 mb-1">{t('address', 'Address')}</p>
+                                        <p className="text-sm text-gray-900">{b.address}</p>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <p className="text-xs text-gray-500 mb-1">{t('phone', 'Phone')}</p>
+                                            <p className="text-sm font-medium text-gray-900 flex items-center">
+                                                <span className="material-symbols-outlined text-gray-400 text-base mr-1">phone</span>
+                                                {b.phoneNumbers}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500 mb-1">{t('city', 'City')}</p>
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                <span className="material-symbols-outlined text-xs mr-1">location_on</span>
+                                                {b.cities.cityName}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 pt-3 border-t">
+                                    <button onClick={() => { setFormData(b); setShowSedesModal(true); }} className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-primary/10 text-primary rounded-md text-sm font-medium hover:bg-primary/20 transition-colors">
+                                        <span className="material-symbols-outlined text-base mr-1">edit</span>
+                                        {t('edit', 'Edit')}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
 
