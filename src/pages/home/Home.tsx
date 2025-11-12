@@ -12,18 +12,18 @@ const Home = () => {
 
     return (
         <>
-            <div className="flex min-h-[100dvh] h-full w-full overflow-x-hidden">
+            <div className="flex h-screen w-full overflow-hidden">
                 {/* Sidebar */}
                 
                 <MenuBar />
 
                 {/* Contenedor principal */}
-                <main className="flex min-w-0 min-h-0 flex-col flex-1">
+                <main className="flex flex-col flex-1 min-w-0 h-full">
                     {/* Header fijo */}
                     <Header />
 
                     {/* Contenedor scrollable */}
-                    <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 bg-gray-50 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+                    <div className="flex-1 overflow-y-auto p-3 sm:p-4 bg-gray-50">
                         <div className="mx-auto w-full max-w-7xl">
                             <Outlet />
                         </div>
