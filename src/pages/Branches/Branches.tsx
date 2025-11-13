@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import type { Branches } from '@/types';
 import { useEffect, useMemo, useState } from "react";
 import Pagination from "@/components/UI/Pagination";
+import { timezones } from "@/data/timezones";
 import { FooterPagination } from "@/components/UI/FooterPagination";
 import BottomSheetModal from "@/components/UI/BottomSheetModal";
 
@@ -246,7 +247,7 @@ const Branches = () => {
     };
 
 
-  // Información necesaria por paginación 
+    // Información necesaria por paginación 
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -343,7 +344,7 @@ const Branches = () => {
                                 <p>{t('no-branches-found', 'No branches found')}</p>
                             </div>
                         )}
-                        
+
                         {currentItems.map((b) => (
                             <div key={b.branchId ?? Math.random()} className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
                                 <div className="flex items-start justify-between mb-3">
@@ -363,7 +364,7 @@ const Branches = () => {
                                         <p className="text-xs text-gray-500 mb-1">{t('address', 'Address')}</p>
                                         <p className="text-sm text-gray-900">{b.address}</p>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-3">
                                         <div>
                                             <p className="text-xs text-gray-500 mb-1">{t('phone', 'Phone')}</p>
@@ -465,9 +466,8 @@ const Branches = () => {
                                         onChange={handleInputChange}
                                         required
                                         placeholder={t('enter-branch-name', 'Enter branch name')}
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
-                                            validated && !formData.branchName ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                                        }`}
+                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${validated && !formData.branchName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                            }`}
                                     />
                                     {validated && !formData.branchName && (
                                         <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -588,15 +588,19 @@ const Branches = () => {
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                                         {t('timezone', 'Timezone')}
                                     </label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">schedule</span>
-                                        <input
+                                    <div className="flex h-11 items-center gap-2 pl-3 pr-2 py-2 border border-gray-300 rounded-lg focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-colors">
+                                        <span className="material-symbols-outlined text-gray-400 text-lg flex-shrink-0">schedule</span>
+                                        <select
                                             name="timezone"
-                                            value={formData.timezone}
-                                            onChange={handleInputChange}
-                                            placeholder="America/Bogota"
-                                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-                                        />
+                                            value={formData.timezone || ''}
+                                            onChange={handleSelectChange}
+                                            className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-gray-900 pr-1"
+                                        >
+                                            <option value="">{t("select-timezone")}</option>
+                                            {timezones.map((tz) => (
+                                                <option key={tz} value={tz}>{tz}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
                             </div>

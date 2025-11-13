@@ -82,25 +82,48 @@ export const UserProfile = () => {
         }
     };
 
-    if (!formData) return <div className="container mt-4"><div className="p-4 bg-white rounded shadow-sm border">{t("loading")}</div></div>;
+    if (!formData) return (
+        <div className="flex items-center justify-center min-h-[200px]">
+            <div className="flex items-center gap-3 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary border-t-transparent"></div>
+                <span className="text-gray-600">{t("loading")}</span>
+            </div>
+        </div>
+    );
 
 
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-white rounded-lg shadow-sm border p-6">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">{t('user-profile', 'Perfil de Usuario')}</h2>
-                    
-                    <form onSubmit={handleSubmit} noValidate className="space-y-6">
-                        {/* Información Personal */}
-                        <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-                            <h3 className="text-lg font-medium text-gray-700 mb-4">{t('personal-info', 'Información Personal')}</h3>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="w-full">
+            <div className="max-w-5xl mx-auto">
+                {/* Header */}
+                <div className="mb-6">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+                        <span className="material-symbols-outlined text-primary text-3xl sm:text-4xl">account_circle</span>
+                        {t('user-profile', 'User Profile')}
+                    </h1>
+                    <p className="mt-2 text-sm sm:text-base text-gray-600">
+                        {t('manage-profile-info', 'Manage your personal information and preferences')}
+                    </p>
+                </div>
+
+                <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                    {/* Personal Information Section */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-4 sm:px-6 py-4 border-b border-gray-200">
+                            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-primary">person</span>
+                                {t('personal-info', 'Personal Information')}
+                            </h2>
+                        </div>
+                        <div className="p-4 sm:p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="firstName">
-                                        {t('first-name', 'Nombre')}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="firstName">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-gray-400 text-lg">badge</span>
+                                            {t('first-name', 'First Name')} <span className="text-red-500">*</span>
+                                        </span>
                                     </label>
                                     <input
                                         type="text"
@@ -109,13 +132,25 @@ export const UserProfile = () => {
                                         value={formData.firstName}
                                         onChange={handleInputChange}
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        placeholder={t('enter-first-name', 'Enter your first name')}
+                                        className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 ${
+                                            validated && !formData.firstName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {validated && !formData.firstName && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-sm">error</span>
+                                            {t('field-required', 'This field is required')}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="lastName">
-                                        {t('last-name', 'Apellido')}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="lastName">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-gray-400 text-lg">badge</span>
+                                            {t('last-name', 'Last Name')} <span className="text-red-500">*</span>
+                                        </span>
                                     </label>
                                     <input
                                         type="text"
@@ -124,13 +159,25 @@ export const UserProfile = () => {
                                         value={formData.lastName}
                                         onChange={handleInputChange}
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        placeholder={t('enter-last-name', 'Enter your last name')}
+                                        className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 ${
+                                            validated && !formData.lastName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {validated && !formData.lastName && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-sm">error</span>
+                                            {t('field-required', 'This field is required')}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
-                                        {t('email', 'Correo Electrónico')}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="email">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-gray-400 text-lg">email</span>
+                                            {t('email', 'Email')} <span className="text-red-500">*</span>
+                                        </span>
                                     </label>
                                     <input
                                         type="email"
@@ -139,13 +186,25 @@ export const UserProfile = () => {
                                         value={formData.email}
                                         onChange={handleInputChange}
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        placeholder={t('enter-email', 'your@email.com')}
+                                        className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 ${
+                                            validated && !formData.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     />
+                                    {validated && !formData.email && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-sm">error</span>
+                                            {t('field-required', 'This field is required')}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="phoneNumber">
-                                        {t('phone', 'Teléfono')}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="phoneNumber">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-gray-400 text-lg">call</span>
+                                            {t('phone', 'Phone')}
+                                        </span>
                                     </label>
                                     <input
                                         type="tel"
@@ -153,20 +212,30 @@ export const UserProfile = () => {
                                         name="phoneNumber"
                                         value={formData.phoneNumber || ''}
                                         onChange={handleInputChange}
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        placeholder={t('enter-phone', '(555) 123-4567')}
+                                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900"
                                     />
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Ubicación */}
-                        <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-                            <h3 className="text-lg font-medium text-gray-700 mb-4">{t('location', 'Ubicación')}</h3>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Location Section */}
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-gradient-to-r from-primary/5 to-primary/10 px-4 sm:px-6 py-4 border-b border-gray-200">
+                            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+                                <span className="material-symbols-outlined text-primary">location_on</span>
+                                {t('location', 'Location')}
+                            </h2>
+                        </div>
+                        <div className="p-4 sm:p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="countryId">
-                                        {t('country', 'País')}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="countryId">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-gray-400 text-lg">public</span>
+                                            {t('country', 'Country')} <span className="text-red-500">*</span>
+                                        </span>
                                     </label>
                                     <select
                                         id="countryId"
@@ -174,20 +243,31 @@ export const UserProfile = () => {
                                         value={formData.countryId}
                                         onChange={handleCountryChange}
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 ${
+                                            validated && !formData.countryId ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     >
-                                        <option value="">{t('select-country', 'Seleccionar país')}</option>
+                                        <option value="">{t('select-country', 'Select country')}</option>
                                         {countries.map(country => (
                                             <option key={country.countryId} value={country.countryId}>
                                                 {country.countryName}
                                             </option>
                                         ))}
                                     </select>
+                                    {validated && !formData.countryId && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-sm">error</span>
+                                            {t('field-required', 'This field is required')}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="stateId">
-                                        {t('state', 'Estado/Departamento')}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="stateId">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-gray-400 text-lg">map</span>
+                                            {t('state', 'State')} <span className="text-red-500">*</span>
+                                        </span>
                                     </label>
                                     <select
                                         id="stateId"
@@ -195,20 +275,32 @@ export const UserProfile = () => {
                                         value={formData.stateId}
                                         onChange={handleStateChange}
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        disabled={!formData.countryId}
+                                        className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
+                                            validated && !formData.stateId ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     >
-                                        <option value="">{t('select-state', 'Seleccionar estado')}</option>
+                                        <option value="">{t('select-state', 'Select state')}</option>
                                         {states.map(state => (
                                             <option key={state.statesPK.stateId} value={state.statesPK.stateId}>
                                                 {state.name}
                                             </option>
                                         ))}
                                     </select>
+                                    {validated && !formData.stateId && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-sm">error</span>
+                                            {t('field-required', 'This field is required')}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="cityId">
-                                        {t('city', 'Ciudad')}
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="cityId">
+                                        <span className="flex items-center gap-1.5">
+                                            <span className="material-symbols-outlined text-gray-400 text-lg">location_city</span>
+                                            {t('city', 'City')} <span className="text-red-500">*</span>
+                                        </span>
                                     </label>
                                     <select
                                         id="cityId"
@@ -216,21 +308,33 @@ export const UserProfile = () => {
                                         value={formData.cityId}
                                         onChange={handleCityChange}
                                         required
-                                        className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                        disabled={!formData.stateId}
+                                        className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed ${
+                                            validated && !formData.cityId ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                                        }`}
                                     >
-                                        <option value="">{t('select-city', 'Seleccionar ciudad')}</option>
+                                        <option value="">{t('select-city', 'Select city')}</option>
                                         {cities.map(city => (
                                             <option key={city.cityId} value={city.cityId}>
                                                 {city.cityName}
                                             </option>
                                         ))}
                                     </select>
+                                    {validated && !formData.cityId && (
+                                        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-sm">error</span>
+                                            {t('field-required', 'This field is required')}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="address">
-                                    {t('address', 'Dirección')}
+                            <div className="mt-4 sm:mt-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="address">
+                                    <span className="flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-gray-400 text-lg">home</span>
+                                        {t('address', 'Address')}
+                                    </span>
                                 </label>
                                 <input
                                     type="text"
@@ -238,29 +342,36 @@ export const UserProfile = () => {
                                     name="address"
                                     value={formData.address || ''}
                                     onChange={handleInputChange}
-                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
+                                    placeholder={t('enter-address', '123 Main Street')}
+                                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors text-gray-900"
                                 />
                             </div>
                         </div>
+                    </div>
 
-                        {/* Botones de acción */}
-                        <div className="flex justify-end space-x-3 pt-4">
-                            <button
-                                type="button"
-                                onClick={() => setFormData(initialDataRef.current)}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                            >
-                                {t('cancel', 'Cancelar')}
-                            </button>
-                            <button
-                                type="submit"
-                                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                            >
-                                {t('save-changes', 'Guardar Cambios')}
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    {/* Action Buttons */}
+                    <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-6">
+                        <button
+                            type="button"
+                            onClick={() => setFormData(initialDataRef.current)}
+                            className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium shadow-sm"
+                        >
+                            <span className="flex items-center justify-center gap-2">
+                                <span className="material-symbols-outlined text-lg">close</span>
+                                {t('cancel', 'Cancel')}
+                            </span>
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-sm hover:shadow-md"
+                        >
+                            <span className="flex items-center justify-center gap-2">
+                                <span className="material-symbols-outlined text-lg">save</span>
+                                {t('save-changes', 'Save Changes')}
+                            </span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

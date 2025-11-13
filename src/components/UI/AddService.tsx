@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { useServicesStore } from "@/store/servicesStore";
 import { useServiceCategoriesStore } from "@/store/serviceCategoriesStore";
-import type { Services } from "@/types";
+import type { ServiceCategories, Services } from "@/types";
 import { showAlertError, showAlertInfo } from "@/utils/sweetalert2";
 import BottomSheetModal from "./BottomSheetModal";
 import { useTranslation } from "react-i18next";
+import { currencies } from "@/data/currency";
 
 interface AddServiceProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ export default function AddService({ isOpen, onClose, initialService }: AddServi
   const { companyId, userId, defaultCurrency } = useAuthStore();
   const { saveService, listServicesByCompany } = useServicesStore();
   const { serviceCategories, listCategoryServiceByCompany } = useServiceCategoriesStore();
+
+  const [serviceActiveCategories, setServiceActiveCategories] = useState<ServiceCategories[]>([]);
 
   const blankService: Services = {
     serviceId: null,
@@ -46,6 +49,10 @@ export default function AddService({ isOpen, onClose, initialService }: AddServi
   }, [serviceCategories.length, companyId, listCategoryServiceByCompany]);
 
   useEffect(() => {
+    setServiceActiveCategories(serviceCategories.filter(cat => cat.status === "A"));
+  }, [serviceCategories]);
+
+  useEffect(() => {
     setForm(initialService || { ...blankService, companyId });
     setValidated(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -55,8 +62,13 @@ export default function AddService({ isOpen, onClose, initialService }: AddServi
     const { name, value } = e.target;
     // Some controls (select) return string even for numeric ids - parse known numeric fields
     if (name === "categoryId" || name === "durationMinutes" || name === "price") {
-      const parsed = Number(value);
-      setForm(prev => ({ ...prev, [name]: isNaN(parsed) ? (value as any) : parsed }));
+      // Allow empty string for better UX when typing
+      if (value === '' || value === null) {
+        setForm(prev => ({ ...prev, [name]: name === "categoryId" ? 0 : (value as any) }));
+      } else {
+        const parsed = Number(value);
+        setForm(prev => ({ ...prev, [name]: isNaN(parsed) ? (value as any) : parsed }));
+      }
     } else {
       setForm(prev => ({ ...prev, [name]: value }));
     }
@@ -192,7 +204,7 @@ export default function AddService({ isOpen, onClose, initialService }: AddServi
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
                 >
                   <option value={0}>{t('uncategorized', 'Uncategorized')}</option>
-                  {serviceCategories.map((cat, idx) => (
+                  {serviceActiveCategories.map((cat, idx) => (
                     <option key={cat.categoryId ?? idx} value={cat.categoryId ?? 0}>{cat.name}</option>
                   ))}
                 </select>
@@ -227,49 +239,57 @@ export default function AddService({ isOpen, onClose, initialService }: AddServi
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   {t('price', 'Price')} <span className="text-red-500">*</span>
                 </label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">$</span>
-                    <input
-                      name="price"
-                      type="number"
-                      step="0.01"
-                      min={0}
-                      value={form.price}
-                      onChange={handleChange}
-                      required
-                      placeholder="0.00"
-                      className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors ${
-                        validated && form.price < 0 ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                      }`}
-                    />
-                  </div>
+                <div className="flex items-center gap-2 pl-3 pr-2 py-2 border border-gray-300 rounded-lg focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-colors">
+                  <span className="text-gray-400 text-lg font-medium flex-shrink-0">$</span>
+                  <input
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    min={0}
+                    value={form.price || ''}
+                    onChange={handleChange}
+                    required
+                    placeholder="0.00"
+                    className={`flex-1 bg-transparent border-none outline-none focus:ring-0 text-gray-900 ${
+                      validated && form.price < 0 ? 'text-red-600' : ''
+                    }`}
+                  />
+                  <div className="h-6 w-px bg-gray-300 flex-shrink-0"></div>
                   <select
                     name="currency"
                     value={form.currency}
                     onChange={handleChange}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    className="bg-transparent border-none outline-none focus:ring-0 text-gray-900 text-sm font-medium pr-6 flex-shrink-0"
                   >
-                    <option value={defaultCurrency}>{defaultCurrency}</option>
+                    {currencies.map(cur => (
+                      <option value={cur.code} key={cur.code}>{cur.code}</option>
+                    ))}
                   </select>
                 </div>
+                {validated && form.price < 0 && (
+                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                    <span className="material-symbols-outlined text-sm mr-1">error</span>
+                    {t('invalid-price', 'Price must be positive')}
+                  </p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   {t('duration', 'Duration (minutes)')}
                 </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-lg">schedule</span>
+                <div className="flex items-center gap-2 pl-3 pr-3 py-2 border border-gray-300 rounded-lg focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-colors">
+                  <span className="material-symbols-outlined text-gray-400 text-lg flex-shrink-0">schedule</span>
                   <input
                     name="durationMinutes"
                     type="number"
                     min={1}
-                    value={form.durationMinutes}
+                    value={form.durationMinutes || ''}
                     onChange={handleChange}
                     placeholder="30"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    className="flex-1 bg-transparent border-none outline-none focus:ring-0 text-gray-900"
                   />
+                  <span className="text-gray-500 text-sm flex-shrink-0">{t('min', 'min')}</span>
                 </div>
               </div>
             </div>
